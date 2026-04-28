@@ -12,12 +12,14 @@ import { useBookmarks } from '../hooks/useBookmarks';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState<'all' | 'foryou'>('all');
   const [user, setUser] = useState<User | null>(auth.currentUser);
-  const [headerHeight, setHeaderHeight] = useState(160);
+  const [headerHeight, setHeaderHeight] = useState(140);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -46,7 +48,7 @@ export default function HomeScreen({ navigation }: any) {
   const itemHeight = SCREEN_HEIGHT - headerHeight;
 
   const renderItem = useCallback(({ item }: { item: Bite }) => (
-    <View style={{ height: itemHeight }}>
+    <View style={{ height: itemHeight, width: SCREEN_WIDTH }}>
       <BiteCard 
         item={item} 
         isBookmarked={isBookmarked(item.id)} 
@@ -102,6 +104,8 @@ export default function HomeScreen({ navigation }: any) {
                 </Pressable>
               )}
               
+              <View style={styles.headerSpacer} />
+
               <Pressable 
                 onPress={() => navigation.navigate('Bookmarks')}
                 style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
@@ -197,10 +201,10 @@ export default function HomeScreen({ navigation }: any) {
               extraData={bookmarks}
               renderItem={renderItem}
               estimatedItemSize={itemHeight}
-              pagingEnabled={Platform.OS === 'ios'} 
+              pagingEnabled={true} 
               snapToInterval={itemHeight}
               snapToAlignment="start"
-              decelerationRate={0.9} 
+              decelerationRate="fast" 
               disableIntervalMomentum={true}
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.id.toString()}
@@ -231,18 +235,19 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#0F172A',
     paddingTop: 12,
-    paddingBottom: 20,
+    paddingBottom: 16,
     paddingHorizontal: 24,
     borderBottomWidth: 1,
     borderBottomColor: '#1E293B',
     zIndex: 10,
   },
-  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   logo: { fontSize: 30, fontWeight: '900', color: '#F8FAFC', letterSpacing: -1.8 },
   dot: { color: '#7C3AED' },
   subtitle: { color: '#64748B', fontSize: 10, fontWeight: '800', letterSpacing: 2.5, marginTop: -4 },
   actionRow: { flexDirection: 'row', alignItems: 'center' },
-  profileContainer: { marginRight: 12 },
+  profileContainer: { },
+  headerSpacer: { width: 16 },
   avatar: { width: 40, height: 40, borderRadius: 14, borderWidth: 1.5, borderColor: '#334155' },
   avatarPlaceholder: { 
     width: 40, height: 40, borderRadius: 14, 
@@ -255,7 +260,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 14,
-    marginRight: 12,
   },
   signInText: {
     color: '#FFFFFF',
@@ -281,7 +285,7 @@ const styles = StyleSheet.create({
   },
   tab: { 
     flex: 1,
-    paddingVertical: 12, 
+    paddingVertical: 10, 
     borderRadius: 14,
     alignItems: 'center',
     overflow: 'hidden',

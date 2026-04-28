@@ -38,7 +38,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, fullScreen,
     <View style={[styles.cardContainer, cardHeight ? { height: cardHeight } : null]}>
       <View style={styles.innerCard}>
         
-        {/* Hero Image Section */}
+        {/* Hero Image Section (1/3 of the card height) */}
         <View style={styles.imageSection}>
           <Image 
             source={{ uri: item.thumbnailUrl || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800' }}
@@ -56,11 +56,11 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, fullScreen,
           </View>
         </View>
 
-        {/* Content Section */}
+        {/* Content Section (2/3 of the card height) */}
         <View style={styles.contentSection}>
-          <View>
+          <View style={styles.textBody}>
             <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-            <Text style={styles.summary} numberOfLines={fullScreen ? 7 : 4}>
+            <Text style={styles.summary} numberOfLines={fullScreen ? 12 : 5}>
               {item.contentSummary}
             </Text>
           </View>
@@ -92,8 +92,6 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, fullScreen,
               </Pressable>
 
             </View>
-            
-            <View style={styles.bottomSpacer} />
           </View>
         </View>
       </View>
@@ -121,7 +119,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   imageSection: {
-    height: '45%',
+    height: '33%', // Strictly 1/3 of the card
     width: '100%',
     position: 'relative',
     backgroundColor: '#1E293B',
@@ -139,11 +137,11 @@ const styles = StyleSheet.create({
   },
   categoryPill: {
     position: 'absolute',
-    top: 24,
-    left: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 14,
+    top: 20,
+    left: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -151,32 +149,38 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.2,
     textTransform: 'uppercase'
   },
   contentSection: {
-    padding: 28,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 28, // Space from inside bottom
     flex: 1,
     justifyContent: 'space-between',
   },
+  textBody: {
+    flex: 1,
+  },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '900',
     color: '#F8FAFC',
     letterSpacing: -0.8,
-    marginBottom: 12,
-    lineHeight: 34,
+    marginBottom: 10,
+    lineHeight: 32,
   },
   summary: {
-    fontSize: 17,
+    fontSize: 16,
     color: '#94A3B8',
-    lineHeight: 26,
+    lineHeight: 24,
     fontWeight: '500',
   },
   footerContainer: {
-    marginTop: 20,
+    marginTop: 'auto',
+    paddingTop: 16,
   },
   actionRow: {
     flexDirection: 'row',
@@ -187,9 +191,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#7C3AED',
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
     paddingVertical: 14,
-    borderRadius: 20,
+    borderRadius: 18,
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -198,20 +202,20 @@ const styles = StyleSheet.create({
   sourceText: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 12,
+    fontSize: 11,
     letterSpacing: 1.2,
   },
   sourceArrow: {
     color: '#E9D5FF',
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 14,
     fontWeight: 'bold'
   },
   bookmarkBtn: {
-    width: 56,
-    height: 56,
+    width: 52,
+    height: 52,
     backgroundColor: '#0F172A',
-    borderRadius: 20,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
@@ -221,11 +225,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E293B',
     borderColor: '#7C3AED',
   },
-  bookmarkIcon: { fontSize: 22 },
+  bookmarkIcon: { fontSize: 20 },
   bookmarkActiveText: { color: '#7C3AED' },
-  bottomSpacer: {
-    height: 12,
-  },
   pressed: { opacity: 0.8, transform: [{ scale: 0.97 }] },
 });
 
