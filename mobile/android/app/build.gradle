@@ -103,7 +103,7 @@ android {
             enable true
             reset()
             include "arm64-v8a", "armeabi-v7a"
-            universalApk false  // Don't build a fat universal APK
+            universalApk true  // Build a fat universal APK that works on all devices
         }
     }
 
