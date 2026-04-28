@@ -25,12 +25,11 @@ spring:
   jpa:
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: ${DDL_AUTO:update}    # 'update' locally, 'validate' in prod after first run
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.MySQLDialect
 
   ai:
     openai:
