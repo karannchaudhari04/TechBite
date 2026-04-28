@@ -137,18 +137,14 @@ public class NewsIngestionService {
         String sourceUrl = entry.getLink();
         if (sourceUrl == null || sourceUrl.isBlank()) return false;
 
-        // Skip if we've already stored this article (deduplication by URL)
-        if (biteRepository.existsByOriginalSourceUrl(sourceUrl)) {
-            log.debug("[NewsIngestion] Skipping duplicate: {}", sourceUrl);
-            return false;
-        }
+        if (biteRepository.existsByOriginalSourceUrl(sourceUrl)) return false;
 
         String rawTitle = entry.getTitle() != null ? entry.getTitle().trim() : "";
         String rawDescription = extractText(entry);
+        String thumbUrl = extractImage(entry);
 
         if (rawTitle.isBlank() || rawDescription.isBlank()) return false;
 
-        // Ask Gemini to produce a student-friendly summary + pick a category
         String aiPrompt = buildPrompt(rawTitle, rawDescription);
         String aiResponse;
         try {
@@ -158,13 +154,12 @@ public class NewsIngestionService {
             return false;
         }
 
-        // Parse the structured AI response
         ParsedBite parsed = parseAiResponse(aiResponse, rawTitle, sourceUrl);
         if (parsed == null) return false;
 
-        // Find the matching category in DB (fallback to first category if not matched)
-        Optional<Category> categoryOpt = categoryRepository.findByNameIn(
-                new HashSet<>(Set.of(parsed.categoryName()))
+        // Find the matching category in DB (case-insensitive)
+        Optional<Category> categoryOpt = categoryRepository.findByNameIgnoreCaseIn(
+                Set.of(parsed.categoryName().toLowerCase())
         ).stream().findFirst();
 
         if (categoryOpt.isEmpty()) {
@@ -172,10 +167,10 @@ public class NewsIngestionService {
             return false;
         }
 
-        // Build and save the Bite
         Bite bite = new Bite();
         bite.setTitle(parsed.title());
         bite.setContentSummary(parsed.summary());
+        bite.setThumbnailUrl(thumbUrl);
         bite.setOriginalSourceUrl(sourceUrl);
         bite.setAuthorAttribution(parseAuthor(entry));
         bite.setCategory(categoryOpt.get());
@@ -185,8 +180,23 @@ public class NewsIngestionService {
                 : LocalDateTime.now());
 
         biteRepository.save(bite);
-        log.info("[NewsIngestion] ✅ Saved: '{}'", bite.getTitle());
+        log.info("[NewsIngestion] ✅ Saved: '{}' with image", bite.getTitle());
         return true;
+    }
+
+    private String extractImage(SyndEntry entry) {
+        if (entry.getEnclosures() != null && !entry.getEnclosures().isEmpty()) {
+            return entry.getEnclosures().get(0).getUrl();
+        }
+        if (entry.getForeignMarkup() != null) {
+            return entry.getForeignMarkup().stream()
+                .filter(el -> el.getName().equals("content") || el.getName().equals("thumbnail"))
+                .map(el -> el.getAttributeValue("url"))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
     }
 
     // ── Build the Gemini prompt ───────────────────────────────────────────────
