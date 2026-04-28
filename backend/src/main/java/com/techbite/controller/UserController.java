@@ -81,7 +81,8 @@ public class UserController {
         }
 
         // Find matching categories in DB (case-insensitive search)
-        Set<Category> matched = categoryRepository.findByNameIn(new HashSet<>(categoryNames));
+        Set<String> lowerNames = categoryNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        Set<Category> matched = categoryRepository.findByNameIgnoreCaseIn(lowerNames);
         user.setPreferences(matched);
         userRepository.save(user);
 

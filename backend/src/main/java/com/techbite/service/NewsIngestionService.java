@@ -54,14 +54,29 @@ public class NewsIngestionService {
 
     private final BiteRepository biteRepository;
     private final CategoryRepository categoryRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final ChatClient chatClient;
 
     public NewsIngestionService(BiteRepository biteRepository,
                                 CategoryRepository categoryRepository,
+                                BookmarkRepository bookmarkRepository,
                                 ChatClient.Builder chatClientBuilder) {
         this.biteRepository = biteRepository;
         this.categoryRepository = categoryRepository;
+        this.bookmarkRepository = bookmarkRepository;
         this.chatClient = chatClientBuilder.build();
+    }
+
+    /**
+     * Runs every midnight to delete bookmarks older than 7 days.
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
+    public void cleanupOldBookmarks() {
+        log.info("[System] Starting bookmark cleanup...");
+        LocalDateTime expiryDate = LocalDateTime.now().minusDays(7);
+        bookmarkRepository.deleteByCreatedAtBefore(expiryDate);
+        log.info("[System] Cleaned up bookmarks older than {}", expiryDate);
     }
 
     // ── Scheduled: runs every 6 hours ────────────────────────────────────────
