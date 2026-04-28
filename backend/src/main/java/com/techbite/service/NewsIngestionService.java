@@ -7,6 +7,7 @@ import com.rometools.rome.io.XmlReader;
 import com.techbite.model.Bite;
 import com.techbite.model.Category;
 import com.techbite.repository.BiteRepository;
+import com.techbite.repository.BookmarkRepository;
 import com.techbite.repository.CategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
