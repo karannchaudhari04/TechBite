@@ -7,14 +7,14 @@
       "policy": "appVersion"
     },
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
     "backgroundColor": "#0F0A1E",
     "primaryColor": "#7C3AED",
     "scheme": "techbite",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash-icon.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#0F0A1E"
     },
@@ -34,13 +34,9 @@
       "package": "com.techbite.app",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.jpg",
         "backgroundColor": "#0F0A1E"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": true,
-      "compileSdk": 34,
-      "targetSdk": 34,
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "android.permission.INTERNET",

@@ -100,10 +100,10 @@ android {
     // armeabi-v7a (~12-15 MB) covers older 32-bit devices.
     splits {
         abi {
-            enable true
+            enable false
             reset()
             include "arm64-v8a", "armeabi-v7a"
-            universalApk true  // Build a fat universal APK that works on all devices
+            universalApk true
         }
     }
 
