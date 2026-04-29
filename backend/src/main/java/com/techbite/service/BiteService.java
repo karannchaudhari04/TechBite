@@ -8,5 +8,4 @@ import org.springframework.data.domain.Pageable;
 public interface BiteService {
     Page<BiteResponseDTO> getAllBites(Pageable pageable);
     Page<BiteResponseDTO> getPersonalizedFeed(User user, Pageable pageable);
-    String getDetailedExplanation(Long biteId);
 }

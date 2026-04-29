@@ -59,12 +59,6 @@ public class BiteController {
         return ResponseEntity.ok(ApiResponse.success(bites, "Personalized feed fetched"));
     }
 
-    @GetMapping("/explain")
-    public ResponseEntity<ApiResponse<String>> getBiteExplanation(
-            @RequestParam Long biteId) {
-        String explanation = biteService.getDetailedExplanation(biteId);
-        return ResponseEntity.ok(ApiResponse.success(explanation, "Explanation generated"));
-    }
 
     // ── Admin Endpoints for News Ingestion ───────────────────────────────────
 

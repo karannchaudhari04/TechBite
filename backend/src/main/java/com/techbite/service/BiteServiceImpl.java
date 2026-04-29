@@ -17,14 +17,11 @@ public class BiteServiceImpl implements BiteService {
 
     private final BiteRepository biteRepository;
     private final UserRepository userRepository;
-    private final ChatClient chatClient;
 
     public BiteServiceImpl(BiteRepository biteRepository, 
-                           UserRepository userRepository, 
-                           ChatClient.Builder chatClientBuilder) {
+                           UserRepository userRepository) {
         this.biteRepository = biteRepository;
         this.userRepository = userRepository;
-        this.chatClient = chatClientBuilder.build();
     }
 
     @Override
@@ -45,28 +42,6 @@ public class BiteServiceImpl implements BiteService {
         return bites.map(this::mapToDTO);
     }
 
-    @Override
-    public String getDetailedExplanation(Long biteId) {
-        try {
-            Optional<Bite> biteOpt = biteRepository.findById(biteId);
-            if (biteOpt.isEmpty()) return "Bite not found.";
-            
-            Bite bite = biteOpt.get();
-            String textToSummarize = bite.getTitle() + ": " + bite.getContentSummary();
-
-            String prompt = "You are an expert tech mentor for CS students. " +
-                            "Explain the following tech concept simply in 100-150 words. " +
-                            "Use bullet points if needed. Focus on 'Why it matters' for developers " +
-                            "and mention any related concepts like System Design, DSA, or Operating Systems:\n\n" + textToSummarize;
-
-            return chatClient.prompt()
-                .user(prompt)
-                .call()
-                .content();
-        } catch (Exception e) {
-            return "Oops! The AI is having trouble simplifying this right now. Please try again later.";
-        }
-    }
 
     private BiteResponseDTO mapToDTO(Bite bite) {
         return BiteResponseDTO.builder()

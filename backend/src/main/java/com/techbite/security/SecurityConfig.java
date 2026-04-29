@@ -37,7 +37,7 @@ public class SecurityConfig {
                 // Health check — needed by Docker and Oracle load balancer
                 .requestMatchers("/actuator/health").permitAll()
                 // Public bite feed endpoints
-                .requestMatchers("/api/v1/bites", "/api/v1/bites/foryou", "/api/v1/bites/explain").permitAll()
+                .requestMatchers("/api/v1/bites", "/api/v1/bites/foryou").permitAll()
                 // Strictly lock admin ingestion and bite management
                 .requestMatchers("/api/v1/bites/admin/**", "/api/v1/admin/**").hasRole("ADMIN")
                 // Strictly protect preferences and bookmarks
