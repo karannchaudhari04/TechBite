@@ -80,6 +80,9 @@ public class NewsIngestionService {
     @Value("${spring.ai.openai.api-key}")
     private String geminiApiKey;
 
+    @Value("${app.news.ingestion.enabled:true}")
+    private boolean ingestionEnabled;
+
     private final RestClient restClient = RestClient.builder().build();
 
     public Map<String, Object> getStatus() {
@@ -100,6 +103,10 @@ public class NewsIngestionService {
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void scheduledIngest() {
+        if (!ingestionEnabled) {
+            log.info("[NewsIngestion] Scheduled run skipped (disabled in config)");
+            return;
+        }
         log.info("[NewsIngestion] Scheduled run started at {}", LocalDateTime.now());
         ingestAllFeeds();
     }
