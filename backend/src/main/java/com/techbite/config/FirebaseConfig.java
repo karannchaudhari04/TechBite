@@ -14,17 +14,25 @@ public class FirebaseConfig {
     public void initialize() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                // By default, uses GOOGLE_APPLICATION_CREDENTIALS env var
-                // For local dev without creds, this might throw if not set, 
-                // but we wrap it safely so the app can start and allow public feeds.
+                // Try to load from classpath (where you put the file)
+                var stream = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
+                
+                GoogleCredentials credentials;
+                if (stream != null) {
+                    credentials = GoogleCredentials.fromStream(stream);
+                } else {
+                    // Fallback to environment variables (for Render)
+                    credentials = GoogleCredentials.getApplicationDefault();
+                }
+
                 FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.getApplicationDefault())
+                        .setCredentials(credentials)
                         .build();
                 FirebaseApp.initializeApp(options);
+                System.out.println("Firebase Auth initialized successfully.");
             }
         } catch (IOException e) {
-            System.err.println("Firebase Auth initialization skipped: GOOGLE_APPLICATION_CREDENTIALS not found.");
-            // We swallow this so public endpoints remain testable
+            System.err.println("Firebase Auth initialization failed: " + e.getMessage());
         }
     }
 }

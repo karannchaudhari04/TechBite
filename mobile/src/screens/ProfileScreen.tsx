@@ -9,6 +9,12 @@ import { auth } from '../utils/firebase';
 export default function ProfileScreen({ navigation }: any) {
   const user = auth.currentUser;
 
+  React.useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    });
+  }, []);
+
   const handleSignOut = () => {
     Alert.alert(
       "Sign Out",
@@ -20,11 +26,19 @@ export default function ProfileScreen({ navigation }: any) {
           style: "destructive",
           onPress: async () => {
             try {
-              // Revoke Google access so the account picker shows on next sign-in
-              await GoogleSignin.revokeAccess();
+              // Sign out from Google (non-blocking)
+              try {
+                await GoogleSignin.signOut();
+              } catch (e) {
+                console.log("Google sign out info:", e);
+              }
+              
+              // Sign out from Firebase
               await signOut(auth);
-              // AppNavigator's onAuthStateChanged handles the navigation + cache clear
+              
+              // Navigation is handled automatically by AppNavigator's onAuthStateChanged
             } catch (error) {
+              console.error("Sign out error:", error);
               Alert.alert("Error", "Failed to sign out. Please try again.");
             }
           }
