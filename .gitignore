@@ -9,6 +9,7 @@ target/
 .env
 .env.production
 backend/src/main/resources/firebase-adminsdk.json
+backend/src/main/resources/google-services.json
 *.p12
 *.jks
 

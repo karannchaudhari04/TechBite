@@ -12,8 +12,6 @@ import { useBookmarks } from '../hooks/useBookmarks';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { LinearGradient } from 'expo-linear-gradient';
-
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {

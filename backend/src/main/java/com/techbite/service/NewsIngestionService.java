@@ -98,27 +98,30 @@ public class NewsIngestionService {
             try {
                 log.info("[NewsIngestion] Fetching feed: {}", feedUrl);
                 List<SyndEntry> entries = fetchRssFeed(feedUrl);
+                log.info("[NewsIngestion] Found {} entries in {}", entries.size(), feedUrl);
 
                 for (SyndEntry entry : entries) {
                     try {
                         boolean saved = processAndSaveEntry(entry);
-                        if (saved) savedCount++;
-                        else skippedCount++;
+                        if (saved) {
+                            savedCount++;
+                            log.info("[NewsIngestion] Saved: {}", entry.getTitle());
+                        } else {
+                            skippedCount++;
+                        }
                     } catch (Exception e) {
-                        log.warn("[NewsIngestion] Failed to process entry '{}': {}", entry.getTitle(), e.getMessage());
+                        log.warn("[NewsIngestion] Failed entry '{}': {}", entry.getTitle(), e.getMessage());
                         skippedCount++;
                     }
-                    // Be polite to Gemini API — small delay between requests
-                    Thread.sleep(1500);
+                    Thread.sleep(1000); // Wait 1s between AI calls
                 }
             } catch (Exception e) {
-                String msg = "Feed failed [" + feedUrl + "]: " + e.getMessage();
-                log.error("[NewsIngestion] {}", msg);
-                errors.add(msg);
+                log.error("[NewsIngestion] Feed failed {}: {}", feedUrl, e.getMessage());
+                errors.add(feedUrl + ": " + e.getMessage());
             }
         }
 
-        log.info("[NewsIngestion] Done. Saved={}, Skipped={}", savedCount, skippedCount);
+        log.info("[NewsIngestion] Completed. Total Saved: {}, Skipped: {}", savedCount, skippedCount);
         return Map.of("saved", savedCount, "skipped", skippedCount, "errors", errors);
     }
 
