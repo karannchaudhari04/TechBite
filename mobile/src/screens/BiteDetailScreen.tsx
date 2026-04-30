@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import BiteCard from '../components/BiteCard';
 import { getBiteById } from '../api';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { auth } from '../utils/firebase';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -12,13 +13,42 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 type Props = NativeStackScreenProps<RootStackParamList, 'BiteDetail'>;
 
 export default function BiteDetailScreen({ route, navigation }: Props) {
-  const { id } = route.params;
+  const params = route.params || {};
+  const id = params.id;
+
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Safety check: Only go to Home if user is logged in
+      const user = auth.currentUser;
+      if (user) {
+        // @ts-ignore - Home might be hidden in some flows
+        navigation.replace('Home');
+      } else {
+        navigation.replace('Welcome');
+      }
+    }
+  };
+
   const { isBookmarked, toggleBookmark } = useBookmarks();
 
   const { data: bite, isLoading, error } = useQuery({
     queryKey: ['bite', id],
-    queryFn: () => getBiteById(id)
+    queryFn: () => getBiteById(id),
+    enabled: !!id // Only run query if we have an ID
   });
+
+  if (!id) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Invalid link or missing ID.</Text>
+        <Pressable onPress={handleBack} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>Go Back</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -32,7 +62,7 @@ export default function BiteDetailScreen({ route, navigation }: Props) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>Bite not found or link expired.</Text>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={handleBack} style={styles.backBtn}>
           <Text style={styles.backBtnText}>Go Back</Text>
         </Pressable>
       </View>
@@ -43,7 +73,7 @@ export default function BiteDetailScreen({ route, navigation }: Props) {
     <View style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={handleBack}>
                 <Text style={styles.headerBack}>← Back to Feed</Text>
             </Pressable>
         </View>

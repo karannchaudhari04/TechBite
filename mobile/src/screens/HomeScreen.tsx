@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { View, Text, ActivityIndicator, RefreshControl, Pressable, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, RefreshControl, Pressable, Dimensions, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
 import { FlashList } from '@shopify/flash-list';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../utils/firebase';
@@ -11,6 +10,7 @@ import { useBites } from '../hooks/useBites';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { Ionicons } from '@expo/vector-icons';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -24,7 +24,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'foryou' | 'saved'>('foryou');
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [headerHeight, setHeaderHeight] = useState(130);
-  const [streak, setStreak] = useState(2); // Simulated streak for UI demo
+  const [streak, setStreak] = useState(12);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -66,14 +66,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           onLayout={(e) => setHeaderHeight(Math.round(e.nativeEvent.layout.height))}
           style={styles.header}
         >
-          {/* Top Bar: Profile | Streak | Logo | Search/Action */}
+          {/* Top Bar */}
           <View style={styles.topBar}>
             <View style={styles.topBarLeft}>
-                <Pressable onPress={() => navigation.navigate('Profile')} style={styles.iconBtn}>
-                   <Text style={styles.topIcon}>≡</Text>
+                <Pressable onPress={() => navigation.navigate('Profile')} style={styles.iconCircle}>
+                   <Ionicons name="person-outline" size={20} color="#94A3B8" />
                 </Pressable>
-                <View style={styles.streakBadge}>
-                   <Text style={styles.streakEmoji}>⚡</Text>
+                <View style={styles.streakContainer}>
+                   <Ionicons name="flash" size={16} color="#F59E0B" />
                    <Text style={styles.streakText}>{streak}</Text>
                 </View>
             </View>
@@ -82,23 +82,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 <Image 
                     source={require('../../assets/logo_horizontal.png')}
                     style={styles.headerLogo}
-                    contentFit="contain"
+                    resizeMode="contain"
                 />
             </View>
 
             <View style={styles.topBarRight}>
-                <Pressable style={styles.iconBtn}>
-                   <Text style={styles.topIcon}>+</Text>
+                <Pressable onPress={() => {}} style={styles.iconCircle}>
+                   <Ionicons name="search-outline" size={20} color="#94A3B8" />
                 </Pressable>
             </View>
           </View>
 
-          {/* Premium Centered Tabs */}
+          {/* Centered Tabs */}
           <View style={styles.tabWrapper}>
               <View style={styles.tabList}>
-                <TabButton label="My Digest" active={activeTab === 'foryou'} onPress={() => setActiveTab('foryou')} />
-                <TabButton label="Topics" active={activeTab === 'all'} onPress={() => setActiveTab('all')} />
-                <TabButton label="Bookmarks" active={activeTab === 'saved'} onPress={() => setActiveTab('saved')} />
+                <TabButton label="Digest" active={activeTab === 'foryou'} onPress={() => setActiveTab('foryou')} />
+                <TabButton label="Explore" active={activeTab === 'all'} onPress={() => setActiveTab('all')} />
+                <TabButton label="Saved" active={activeTab === 'saved'} onPress={() => setActiveTab('saved')} />
               </View>
           </View>
         </View>
@@ -145,41 +145,38 @@ const TabButton = ({ label, active, onPress }: { label: string, active: boolean,
 );
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#020617' },
+  root: { flex: 1, backgroundColor: '#0F172A' },
   safeArea: { flex: 1 },
-  header: { paddingBottom: 8, backgroundColor: '#020617' },
+  header: { paddingBottom: 4, backgroundColor: '#0F172A' },
   topBar: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between', 
-    paddingHorizontal: 16, 
-    paddingVertical: 12 
+    paddingHorizontal: 20, 
+    paddingVertical: 10 
   },
-  topBarLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  topBarLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 10 },
   topBarCenter: { flex: 2, alignItems: 'center' },
   topBarRight: { flex: 1, alignItems: 'flex-end' },
-  headerLogo: { width: 120, height: 32 },
-  iconBtn: { padding: 8 },
-  topIcon: { color: '#94A3B8', fontSize: 24, fontWeight: '300' },
-  streakBadge: { 
+  headerLogo: { width: 110, height: 28 },
+  iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#1E293B', justifyContent: 'center', alignItems: 'center' },
+  streakContainer: { 
     flexDirection: 'row', 
-    backgroundColor: '#1E293B', 
+    backgroundColor: 'rgba(245, 158, 11, 0.1)', 
     paddingHorizontal: 8, 
     paddingVertical: 4, 
-    borderRadius: 12,
-    alignItems: 'center',
-    marginLeft: 8
+    borderRadius: 10,
+    alignItems: 'center'
   },
-  streakEmoji: { fontSize: 14, marginRight: 4 },
-  streakText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
-  tabWrapper: { alignItems: 'center', marginTop: 12 },
+  streakText: { color: '#F59E0B', fontSize: 13, fontWeight: '800', marginLeft: 4 },
+  tabWrapper: { alignItems: 'center', marginTop: 8 },
   tabList: { flexDirection: 'row', gap: 32 },
-  tabBtn: { paddingBottom: 10, alignItems: 'center' },
-  tabLabel: { color: '#475569', fontSize: 14, fontWeight: '600' },
-  tabLabelActive: { color: '#FFFFFF' },
-  tabIndicator: { width: 20, height: 3, backgroundColor: '#6366F1', borderRadius: 2, marginTop: 4 },
+  tabBtn: { paddingBottom: 8, alignItems: 'center' },
+  tabLabel: { color: '#64748B', fontSize: 15, fontWeight: '700' },
+  tabLabelActive: { color: '#F8FAFC' },
+  tabIndicator: { width: 16, height: 3, backgroundColor: '#6366F1', borderRadius: 2, marginTop: 4 },
   feed: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 60 },
-  emptyTitle: { color: '#FFFFFF', fontSize: 24, fontWeight: '900', marginBottom: 12 },
-  emptyText: { color: '#64748B', fontSize: 16, textAlign: 'center', lineHeight: 24, fontWeight: '500' }
+  emptyTitle: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginBottom: 12 },
+  emptyText: { color: '#94A3B8', fontSize: 16, textAlign: 'center', lineHeight: 24, fontWeight: '500' }
 });

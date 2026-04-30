@@ -35,8 +35,8 @@
       "package": "com.techbite.app",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.jpg",
-        "backgroundColor": "#0F0A1E"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0F172A"
       },
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [
@@ -76,7 +76,8 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {

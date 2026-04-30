@@ -1,0 +1,133 @@
+import React from 'react';
+import { View, Text, StyleSheet, Image, Pressable, Dimensions, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+interface OnboardingIntroScreenProps {
+  onNext: () => void;
+}
+
+export default function OnboardingIntroScreen({ onNext }: OnboardingIntroScreenProps) {
+  return (
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safeArea}>
+        
+        {/* Top Header */}
+        <View style={styles.topSection}>
+           <View style={styles.botRow}>
+              <Image 
+                source={require('../../assets/techbot.png')}
+                style={styles.botIcon}
+                resizeMode="contain"
+              />
+              <View style={styles.bubble}>
+                 <Text style={styles.bubbleText}>Master tech, {"\n"}<Text style={styles.highlightText}>one bite at a time.</Text></Text>
+              </View>
+           </View>
+        </View>
+
+        {/* Center Card */}
+        <View style={styles.centerContainer}>
+           <View style={styles.glassCard}>
+              <View style={styles.brandRow}>
+                <Image 
+                    source={require('../../assets/welcome_logo.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
+                <Text style={styles.brandName}>TechBite</Text>
+              </View>
+
+              <Text style={styles.description}>
+                We curate high-yield interview questions, industry trends, and coding patterns to help you land your dream job.
+              </Text>
+
+              <View style={styles.illustrationWrap}>
+                <Image 
+                    source={require('../../assets/intro_cards.png')}
+                    style={styles.cardsIllustration}
+                    resizeMode="contain"
+                />
+              </View>
+           </View>
+        </View>
+
+        {/* Bottom CTA Section */}
+        <View style={styles.bottomSection}>
+           <Text style={styles.botGreeting}>
+             Your personalized roadmap to tech excellence.
+           </Text>
+
+           <Pressable 
+              onPress={onNext}
+              style={({ pressed }) => [
+                styles.startBtn, 
+                pressed && styles.btnPressed
+              ]}
+           >
+              <Text style={styles.btnText}>Let's start</Text>
+              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+           </Pressable>
+        </View>
+
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#020617' },
+  safeArea: { flex: 1 },
+  
+  topSection: { paddingHorizontal: 24, marginTop: 45, marginBottom: 5, flexShrink: 1 },
+  botRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  botIcon: { width: 70, height: 70 },
+  bubble: { flex: 1 },
+  bubbleText: { color: '#FFFFFF', fontSize: 26, fontWeight: '800', lineHeight: 32 },
+  highlightText: { color: '#818CF8' },
+
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
+  glassCard: { 
+    width: '100%',
+    height: SCREEN_HEIGHT * 0.52,
+    borderRadius: 36, 
+    backgroundColor: 'rgba(30, 41, 59, 0.4)',
+    borderWidth: 1.5, 
+    borderColor: 'rgba(255,255,255,0.12)',
+    padding: 28,
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  logo: { width: 32, height: 32 },
+  brandName: { color: '#F8FAFC', fontSize: 26, fontWeight: '900' },
+  description: { color: '#94A3B8', fontSize: 17, textAlign: 'center', lineHeight: 26, fontWeight: '500' },
+  illustrationWrap: { width: '100%', height: '55%', justifyContent: 'center' },
+  cardsIllustration: { width: '100%', height: '100%' },
+
+  // Bottom section with NO flex to prevent stretching
+  bottomSection: { 
+    paddingHorizontal: 24, 
+    paddingBottom: 50, 
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: 'transparent'
+  },
+  botGreeting: { color: '#94A3B8', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 25, fontWeight: '600' },
+  
+  startBtn: { 
+    width: 280, // Fixed width
+    height: 60, // Fixed height
+    minHeight: 60,
+    maxHeight: 60,
+    borderRadius: 20, 
+    backgroundColor: '#818CF8',
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    gap: 12,
+  },
+  btnText: { color: '#FFFFFF', fontSize: 19, fontWeight: '800' },
+  btnPressed: { opacity: 0.8, transform: [{ scale: 0.98 }] }
+});

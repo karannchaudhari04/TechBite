@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, SafeAreaView, StyleSheet, ActivityIndicator, Alert, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
+import { View, Text, Pressable, SafeAreaView, StyleSheet, ActivityIndicator, Alert, Image, Dimensions, ToastAndroid, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../utils/firebase';
 import { apiClient } from '../api/client';
+import { Ionicons } from '@expo/vector-icons';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface WelcomeScreenProps {
   onSkip: () => void;
@@ -16,6 +18,7 @@ export default function WelcomeScreen({ onSkip, onSignedIn }: WelcomeScreenProps
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    if (isSigningIn) return;
     setIsSigningIn(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -27,20 +30,20 @@ export default function WelcomeScreen({ onSkip, onSignedIn }: WelcomeScreenProps
       const googleCredential = GoogleAuthProvider.credential(idToken);
       await signInWithCredential(auth, googleCredential);
 
-      try {
-        const res = await apiClient.post<{ hasPreferences: boolean }>('/users/register-or-login', {
-          email: auth.currentUser?.email,
-          displayName: auth.currentUser?.displayName,
-          photoUrl: auth.currentUser?.photoURL
-        });
-        onSignedIn(res.hasPreferences);
-      } catch (err) {
-        console.error("Backend Registration Failed:", err);
-        Alert.alert("Server Error", "Successfully signed in with Google, but could not connect to TechBite server. Please check your internet or try again later.");
+      if (Platform.OS === 'android') {
+        ToastAndroid.show("Sign in successful!", ToastAndroid.SHORT);
       }
+
+      const res = await apiClient.post<{ hasPreferences: boolean }>('/users/register-or-login', {
+        email: auth.currentUser?.email,
+        displayName: auth.currentUser?.displayName,
+        photoUrl: auth.currentUser?.photoURL
+      });
+      onSignedIn(res.hasPreferences);
     } catch (error: any) {
-      console.error("Google Sign-In Error:", error);
-      Alert.alert("Sign In Failed", error.message || "Please try again.");
+      if (error.code !== 'ASYNC_OP_IN_PROGRESS') {
+        Alert.alert("Sign In Failed", error.message || "Please try again.");
+      }
     } finally {
       setIsSigningIn(false);
     }
@@ -48,80 +51,68 @@ export default function WelcomeScreen({ onSkip, onSignedIn }: WelcomeScreenProps
 
   return (
     <View style={styles.root}>
-      <View style={styles.darkOverlay} />
-      
       <SafeAreaView style={styles.safeArea}>
         
-        {/* Top Header with Skip */}
         <View style={styles.topBar}>
-          <Pressable onPress={onSkip}>
+          <Pressable onPress={onSkip} style={styles.skipBtn}>
             <Text style={styles.skipText}>Skip</Text>
           </Pressable>
         </View>
 
-        {/* Brand & Tagline */}
-        <View style={styles.hero}>
-          <Image 
-            source={require('../../assets/logo_horizontal.png')}
-            style={styles.brandLogo}
-            contentFit="contain"
-          />
-          <Text style={styles.tagline}>Tech News, Made Easy!</Text>
+        <View style={styles.contentContainer}>
+          <View style={styles.headerSection}>
+            <View style={styles.logoRow}>
+               <Image 
+                  source={require('../../assets/welcome_logo.png')}
+                  style={styles.abstractLogo}
+                  resizeMode="contain"
+               />
+               <Text style={styles.brandName}>TechBite</Text>
+            </View>
+            <Text style={styles.tagline}>Tech News, Made Easy!</Text>
+          </View>
           
-          {/* Central Illustration Placeholder (Matching DevBytes) */}
-          <View style={styles.illustrationBox}>
+          <View style={styles.illustrationSection}>
             <Image 
-               source="https://ouch-cdn2.icons8.com/Z8v_V3Xq_I3Q7X9Zq_Y3Xq_I3Q7X9Zq_Y3Xq_I3Q7X9Zq_Y3Xq_I.png" // Placeholder tech illustration
-               style={styles.illustration}
-               contentFit="contain"
+              source={require('../../assets/welcome_illustration.png')}
+              style={styles.illustration}
+              resizeMode="contain"
             />
           </View>
 
-          <Text style={styles.mainTitle}>Let’s get started!</Text>
-          <Text style={styles.subTitle}>Signing up helps us save your preferences.</Text>
+          <View style={styles.titleSection}>
+             <Text style={styles.mainTitle}>Let's get started!</Text>
+             <Text style={styles.subTitle}>Signing up helps us save your preferences.</Text>
+          </View>
+
+          <View style={styles.actionArea}>
+            <Pressable
+              onPress={handleGoogleSignIn}
+              disabled={isSigningIn}
+              style={({ pressed }) => [styles.socialBtn, pressed && styles.btnPressed]}
+            >
+              <View style={styles.btnContent}>
+                  {isSigningIn ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <>
+                      <Image 
+                        source={require('../../assets/google.png')}
+                        style={styles.googleIcon}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.socialBtnText}>Sign up with Google.</Text>
+                    </>
+                  )}
+              </View>
+            </Pressable>
+
+            <Text style={styles.legalText}>
+              By continuing, you agree to the <Text style={styles.link}>rules</Text> and <Text style={styles.link}>privacy policy</Text>.
+            </Text>
+          </View>
         </View>
 
-        {/* Action Area - Social Buttons */}
-        <View style={styles.actionArea}>
-          <Pressable
-            onPress={handleGoogleSignIn}
-            disabled={isSigningIn}
-            style={({ pressed }) => [
-              styles.socialBtn,
-              pressed && { opacity: 0.8, scale: 0.98 }
-            ]}
-          >
-            <View style={styles.socialBtnContent}>
-              <Image
-                source="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialBtnText}>Sign up with Google.</Text>
-              {isSigningIn && <ActivityIndicator color="#FFF" style={{ marginLeft: 10 }} />}
-            </View>
-          </Pressable>
-
-          <Pressable
-            onPress={() => Alert.alert("Coming Soon", "GitHub login will be available in the next update!")}
-            style={({ pressed }) => [
-              styles.socialBtn,
-              { marginTop: 16 },
-              pressed && { opacity: 0.8, scale: 0.98 }
-            ]}
-          >
-            <View style={styles.socialBtnContent}>
-              <Image
-                source="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
-                style={[styles.socialIcon, { tintColor: '#FFF' }]}
-              />
-              <Text style={styles.socialBtnText}>Sign up with GitHub.</Text>
-            </View>
-          </Pressable>
-
-          <Text style={styles.legalText}>
-            By continuing, you agree to the <Text style={styles.link}>rules</Text> and <Text style={styles.link}>privacy policy</Text>.
-          </Text>
-        </View>
       </SafeAreaView>
     </View>
   );
@@ -129,31 +120,27 @@ export default function WelcomeScreen({ onSkip, onSignedIn }: WelcomeScreenProps
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#020617' },
-  darkOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
   safeArea: { flex: 1 },
-  topBar: { paddingHorizontal: 24, paddingTop: 20, alignItems: 'flex-end' },
-  skipText: { color: '#818CF8', fontSize: 16, fontWeight: '700' },
-  hero: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
-  brandLogo: { width: 220, height: 60, marginBottom: 8 },
-  tagline: { color: '#94A3B8', fontSize: 18, fontWeight: '500', marginBottom: 40 },
-  illustrationBox: { width: '100%', height: 220, marginBottom: 40 },
-  illustration: { width: '100%', height: '100%' },
-  mainTitle: { color: '#FFFFFF', fontSize: 32, fontWeight: '800', marginBottom: 12 },
-  subTitle: { color: '#64748B', fontSize: 16, textAlign: 'center', marginBottom: 40, fontWeight: '500' },
-  actionArea: { paddingHorizontal: 24, paddingBottom: 40 },
-  socialBtn: {
-    width: '100%',
-    height: 64,
-    backgroundColor: '#0F172A',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#1E293B',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  socialBtnContent: { flexDirection: 'row', alignItems: 'center' },
-  socialIcon: { width: 24, height: 24, marginRight: 16 },
+  contentContainer: { flex: 1, justifyContent: 'space-between', paddingBottom: 40 },
+  topBar: { paddingHorizontal: 24, marginTop: 20, paddingBottom: 10, alignItems: 'flex-end' },
+  skipBtn: { padding: 8 },
+  skipText: { color: '#6366F1', fontSize: 17, fontWeight: '700' },
+  headerSection: { alignItems: 'center' },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  abstractLogo: { width: 44, height: 44 },
+  brandName: { color: '#F8FAFC', fontSize: 34, fontWeight: '900', letterSpacing: -0.5 },
+  tagline: { color: '#94A3B8', fontSize: 18, marginTop: 6, fontWeight: '600' },
+  illustrationSection: { width: '100%', height: SCREEN_HEIGHT * 0.32, justifyContent: 'center', alignItems: 'center' },
+  illustration: { width: '88%', height: '100%' },
+  titleSection: { alignItems: 'center', paddingHorizontal: 40 },
+  mainTitle: { color: '#FFFFFF', fontSize: 34, fontWeight: '800', textAlign: 'center', letterSpacing: -0.5 },
+  subTitle: { color: '#94A3B8', fontSize: 17, textAlign: 'center', marginTop: 10, lineHeight: 24, fontWeight: '500' },
+  actionArea: { paddingHorizontal: 28 },
+  socialBtn: { width: '100%', height: 62, backgroundColor: '#1E293B', borderRadius: 14, borderWidth: 1, borderColor: '#334155', justifyContent: 'center', alignItems: 'center' },
+  btnContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', gap: 14 },
+  googleIcon: { width: 22, height: 22 },
   socialBtnText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  legalText: { color: '#475569', fontSize: 12, textAlign: 'center', marginTop: 32 },
-  link: { color: '#6366F1', textDecorationLine: 'underline' }
+  btnPressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
+  legalText: { color: '#475569', fontSize: 13, textAlign: 'center', marginTop: 30, fontWeight: '500' },
+  link: { color: '#6366F1', fontWeight: '600' }
 });
