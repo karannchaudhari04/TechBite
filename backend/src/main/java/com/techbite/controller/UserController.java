@@ -18,10 +18,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
+    private final com.techbite.repository.UserRepository userRepository;
+    private final com.techbite.repository.CategoryRepository categoryRepository;
+    private final com.techbite.service.UserService userService;
     private final com.techbite.repository.BookmarkRepository bookmarkRepository;
 
-    public UserController(UserRepository userRepository, 
-                          CategoryRepository categoryRepository, 
+    public UserController(com.techbite.repository.UserRepository userRepository, 
+                          com.techbite.repository.CategoryRepository categoryRepository, 
                           com.techbite.service.UserService userService,
                           com.techbite.repository.BookmarkRepository bookmarkRepository) {
         this.userRepository = userRepository;
