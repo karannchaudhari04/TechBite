@@ -37,7 +37,11 @@ export default function BookmarksScreen({ navigation }: any) {
           style={styles.header}
         >
           <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn}>
-            <Ionicons name="chevron-back" size={24} color="#F1F5F9" />
+            <Image 
+              source={require('../../assets/back.png')} 
+              style={{ width: 22, height: 22 }} 
+              contentFit="contain"
+            />
           </Pressable>
           
           <View style={styles.titleContainer}>
