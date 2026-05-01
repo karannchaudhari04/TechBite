@@ -61,14 +61,18 @@ export default function AppNavigator() {
       if (currentUser) {
         setIsInitializing(true);
         try {
+          const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'FALLBACK';
+          console.info(`[AuthSync] Handshaking with backend at: ${apiUrl}`);
+          
           await userApi.registerOrLogin(
             currentUser.email || '', 
             currentUser.displayName || 'Tech Explorer', 
             currentUser.photoURL || ''
           );
+          console.info('[AuthSync] Handshake successful.');
           setCurrentFlow('Home');
         } catch (error) {
-          console.error('[AuthSync] Backend sync failed:', error);
+          console.error('[AuthSync] Backend sync failed. Check if API_URL is correct:', error);
           setCurrentFlow('Home');
         }
       } else {

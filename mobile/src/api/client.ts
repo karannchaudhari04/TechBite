@@ -3,7 +3,10 @@
 
 import { auth } from '../utils/firebase';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:8080/api/v1';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.35:8080/api/v1';
+if (!process.env.EXPO_PUBLIC_API_URL) {
+  console.warn('[API] Warning: EXPO_PUBLIC_API_URL is not defined. Falling back to local development URL.');
+}
 
 /** Gets the current user's Firebase ID token, or null if not signed in. */
 async function getAuthToken(): Promise<string | null> {
