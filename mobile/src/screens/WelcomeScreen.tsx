@@ -34,12 +34,9 @@ export default function WelcomeScreen({ onSkip, onSignedIn }: WelcomeScreenProps
         ToastAndroid.show("Sign in successful!", ToastAndroid.SHORT);
       }
 
-      const res = await apiClient.post<{ hasPreferences: boolean }>('/users/register-or-login', {
-        email: auth.currentUser?.email,
-        displayName: auth.currentUser?.displayName,
-        photoUrl: auth.currentUser?.photoURL
-      });
-      onSignedIn(res.hasPreferences);
+      // Redundant sync removed. AppNavigator handles the handshake via onAuthStateChanged.
+      // We just need to wait for the user to be signed into Firebase.
+      // onSignedIn will be called by the AppNavigator's listener logic.
     } catch (error: any) {
       if (error.code !== 'ASYNC_OP_IN_PROGRESS') {
         Alert.alert("Sign In Failed", error.message || "Please try again.");

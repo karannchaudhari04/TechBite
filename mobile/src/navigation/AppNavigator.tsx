@@ -64,16 +64,21 @@ export default function AppNavigator() {
           const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'FALLBACK';
           console.info(`[AuthSync] Handshaking with backend at: ${apiUrl}`);
           
-          await userApi.registerOrLogin(
+          const res = await userApi.registerOrLogin(
             currentUser.email || '', 
             currentUser.displayName || 'Tech Explorer', 
             currentUser.photoURL || ''
           );
           console.info('[AuthSync] Handshake successful.');
-          setCurrentFlow('Home');
+          
+          if (res.hasPreferences) {
+            setCurrentFlow('Home');
+          } else {
+            setCurrentFlow('OnboardingIntro');
+          }
         } catch (error) {
-          console.error('[AuthSync] Backend sync failed. Check if API_URL is correct:', error);
-          setCurrentFlow('Home');
+          console.error('[AuthSync] Backend sync failed:', error);
+          setCurrentFlow('Home'); // Fallback to Home if sync fails but user is authenticated
         }
       } else {
         queryClient.removeQueries({ queryKey: ['bookmarks'] });
