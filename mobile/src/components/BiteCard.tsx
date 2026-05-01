@@ -167,6 +167,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                     <Image 
                       source={hasLiked ? require('../../assets/liked.png') : require('../../assets/like.png')} 
                       style={styles.iconAsset} 
+                      contentFit="contain"
                     />
                   </Animated.View>
                   <Text style={[styles.statText, hasLiked && { color: '#F87171' }]}>{likes}</Text>
@@ -177,6 +178,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                     <Image 
                       source={localBookmarked ? require('../../assets/save.png') : require('../../assets/savebite.png')} 
                       style={styles.iconAsset} 
+                      contentFit="contain"
                     />
                   </Animated.View>
                   <Text style={[styles.actionText, localBookmarked && { color: '#6366F1' }]}>Save</Text>
@@ -187,6 +189,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                <Image 
                  source={require('../../assets/share.png')} 
                  style={styles.iconAsset} 
+                 contentFit="contain"
                />
                <Text style={styles.actionText}>Share</Text>
             </Pressable>
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
   statText: { color: '#FFF', fontSize: 14, fontWeight: '700' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 4 },
   actionText: { color: '#FFF', fontSize: 13, fontWeight: '600' },
-  iconAsset: { width: 24, height: 24, contentFit: 'contain' },
+  iconAsset: { width: 24, height: 24 },
 
   progressBar: { height: 3, width: '100%', backgroundColor: 'rgba(255,255,255,0.05)' },
   progressFill: { height: '100%', backgroundColor: '#6366F1' }
