@@ -146,8 +146,8 @@ export default function ProfileScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color="#F1F5F9" />
           </Pressable>
           <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable onPress={() => refetch()} style={styles.iconBtn}>
-            <Ionicons name="sync" size={20} color="#F1F5F9" />
+          <Pressable onPress={() => navigation.navigate('Personalization')} style={styles.iconBtn}>
+            <Ionicons name="settings-sharp" size={20} color="#F1F5F9" />
           </Pressable>
         </View>
 
