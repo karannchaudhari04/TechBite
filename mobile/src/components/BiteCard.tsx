@@ -161,10 +161,9 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
             <View style={styles.leftActions}>
                <Pressable onPress={handleLike} style={styles.actionBtn}>
                   <Animated.View style={likeAnimatedStyle}>
-                    <MaterialCommunityIcons 
-                      name={hasLiked ? "heart" : "heart-outline"} 
-                      size={24} 
-                      color={hasLiked ? "#F87171" : "#FFF"} 
+                    <Image 
+                      source={hasLiked ? require('../../assets/liked.png') : require('../../assets/like.png')} 
+                      style={styles.iconAsset} 
                     />
                   </Animated.View>
                   <Text style={[styles.statText, hasLiked && { color: '#F87171' }]}>{likes}</Text>

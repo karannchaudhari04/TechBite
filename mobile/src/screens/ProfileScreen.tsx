@@ -143,11 +143,19 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn}>
-            <Ionicons name="chevron-back" size={24} color="#F1F5F9" />
+            <Image 
+              source={require('../../assets/back.png')} 
+              style={{ width: 22, height: 22 }} 
+              contentFit="contain"
+            />
           </Pressable>
           <Text style={styles.headerTitle}>Profile</Text>
           <Pressable onPress={() => navigation.navigate('Personalization')} style={styles.iconBtn}>
-            <Ionicons name="settings-sharp" size={20} color="#F1F5F9" />
+            <Image 
+              source={require('../../assets/setting.png')} 
+              style={{ width: 22, height: 22 }} 
+              contentFit="contain"
+            />
           </Pressable>
         </View>
 
