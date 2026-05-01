@@ -105,13 +105,20 @@ public class BiteController {
         Bite bite = biteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bite not found"));
         
+        int currentCount = (bite.getEngagementCount() == null ? 0 : bite.getEngagementCount());
+
         if (user.getLikedBites().contains(bite)) {
-            // Already liked, optionally unlike it? Let's just return current count for now
-            return ResponseEntity.ok(ApiResponse.success(bite.getEngagementCount(), "Already liked"));
+            // UNLIKE: Remove from user's list and decrement count
+            user.getLikedBites().remove(bite);
+            bite.setEngagementCount(Math.max(0, currentCount - 1));
+            userRepository.save(user);
+            biteRepository.save(bite);
+            return ResponseEntity.ok(ApiResponse.success(bite.getEngagementCount(), "Bite unliked"));
         }
         
+        // LIKE: Add to user's list and increment count
         user.getLikedBites().add(bite);
-        bite.setEngagementCount((bite.getEngagementCount() == null ? 0 : bite.getEngagementCount()) + 1);
+        bite.setEngagementCount(currentCount + 1);
         
         userRepository.save(user);
         biteRepository.save(bite);

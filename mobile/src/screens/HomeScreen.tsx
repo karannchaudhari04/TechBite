@@ -135,7 +135,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                    <Image 
                      source={require('../../assets/fire.png')} 
                      style={{ width: 18, height: 18, marginRight: 4 }} 
-                     contentFit="contain"
+                     resizeMode="contain"
                    />
                    <Text style={styles.streakText}>{streak}</Text>
                 </View>

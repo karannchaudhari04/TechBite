@@ -34,20 +34,34 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
   };
 
   const handleLike = async () => {
-    if (hasLiked) return;
-    
-    // Spark just the like button
+    // Spark on every toggle
     likeScale.value = withSequence(withSpring(1.5), withSpring(1));
 
-    setLikes(prev => prev + 1);
-    setHasLiked(true);
-    try {
-      const newCount = await likeBite(item.id);
-      setLikes(newCount); 
-      queryClient.invalidateQueries({ queryKey: ['bites'] });
-    } catch (error) {
-      setLikes(prev => prev - 1);
+    if (hasLiked) {
+      // UNLIKE
+      setLikes(prev => Math.max(0, prev - 1));
       setHasLiked(false);
+      try {
+        // We'll need a backend endpoint for unlike, or just use the same one if it toggles
+        const newCount = await likeBite(item.id); 
+        setLikes(newCount);
+        queryClient.invalidateQueries({ queryKey: ['bites'] });
+      } catch (error) {
+        setLikes(prev => prev + 1);
+        setHasLiked(true);
+      }
+    } else {
+      // LIKE
+      setLikes(prev => prev + 1);
+      setHasLiked(true);
+      try {
+        const newCount = await likeBite(item.id);
+        setLikes(newCount); 
+        queryClient.invalidateQueries({ queryKey: ['bites'] });
+      } catch (error) {
+        setLikes(prev => prev - 1);
+        setHasLiked(false);
+      }
     }
   };
 
@@ -147,9 +161,10 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
             <View style={styles.leftActions}>
                <Pressable onPress={handleLike} style={styles.actionBtn}>
                   <Animated.View style={likeAnimatedStyle}>
-                    <Image 
-                      source={require('../../assets/like.png')} 
-                      style={[styles.iconAsset, { tintColor: hasLiked ? "#F87171" : "#FFF" }]} 
+                    <MaterialCommunityIcons 
+                      name={hasLiked ? "heart" : "heart-outline"} 
+                      size={24} 
+                      color={hasLiked ? "#F87171" : "#FFF"} 
                     />
                   </Animated.View>
                   <Text style={[styles.statText, hasLiked && { color: '#F87171' }]}>{likes}</Text>
