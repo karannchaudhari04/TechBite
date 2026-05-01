@@ -176,7 +176,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                <Pressable onPress={handleToggleBookmark} style={styles.actionBtn}>
                   <Animated.View style={saveAnimatedStyle}>
                     <Image 
-                      source={localBookmarked ? require('../../assets/save.png') : require('../../assets/savebite.png')} 
+                      source={localBookmarked ? require('../../assets/savebite.png') : require('../../assets/save.png')} 
                       style={styles.iconAsset} 
                       contentFit="contain"
                     />
