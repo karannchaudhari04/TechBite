@@ -2,13 +2,12 @@ package com.techbite.repository;
 
 import com.techbite.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import java.util.Set;
+import java.util.List;
 
+@Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    Set<Category> findByNameIn(Set<String> names);
-    
-    @Query("SELECT c FROM Category c WHERE LOWER(c.name) IN :names")
-    Set<Category> findByNameIgnoreCaseIn(@Param("names") Set<String> names);
+    Set<Category> findByNameIgnoreCaseIn(Set<String> names);
+    List<Category> findAllByOrderByNameAsc();
 }

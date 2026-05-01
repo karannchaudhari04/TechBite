@@ -52,6 +52,9 @@ public class Bite {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "engagement_count")
+    private Integer engagementCount = 0;
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

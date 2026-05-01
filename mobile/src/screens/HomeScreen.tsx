@@ -10,9 +10,9 @@ import { useBites } from '../hooks/useBites';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '../api/user';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -35,10 +35,9 @@ const ALL_CATEGORY_TABS = [
 ];
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const [activeTabId, setActiveTabId] = useState('foryou');
+  const [activeTabId, setActiveTabId] = useState('digest');
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [headerHeight, setHeaderHeight] = useState(110);
-  const [streak, setStreak] = useState(12);
 
   // Fetch user's selected category names
   const { data: userPrefs } = useQuery({
@@ -49,7 +48,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   // Build the dynamic tab list
   const dynamicTabs = useMemo(() => {
-    const base = [{ id: 'foryou', label: 'For you', type: 'foryou' as const }];
+    const base = [
+      { id: 'digest', label: 'Digest', type: 'all' as const }
+    ];
     if (!userPrefs) return base;
 
     const matchedTabs = ALL_CATEGORY_TABS.filter(tab => 
@@ -58,6 +59,26 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
     return [...base, ...matchedTabs];
   }, [userPrefs]);
+
+  const queryClient = useQueryClient();
+
+  // Fetch user profile for real-time streak
+  const { data: profile } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: () => userApi.getProfile(),
+    enabled: !!user
+  });
+
+  const streak = profile?.streakCount || 0;
+
+  useEffect(() => {
+    // Update streak on mount if user is logged in
+    if (user) {
+      userApi.updateStreak().then(() => {
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      });
+    }
+  }, [user]);
 
   const activeTab = dynamicTabs.find(t => t.id === activeTabId) || dynamicTabs[0];
 
@@ -70,14 +91,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   
   const { 
     data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching 
-  } = useBites(activeTab.type, activeTab.cid);
+  } = useBites(activeTab.type, (activeTab as any).cid);
   
   const { bookmarks, isBookmarked, toggleBookmark } = useBookmarks();
 
   const bitesData = useMemo(() => {
-    if (activeTab === 'saved') return bookmarks;
     return data ? data.pages.flatMap(page => page.content) : [];
-  }, [data, activeTab, bookmarks]);
+  }, [data]);
 
   const itemHeight = SCREEN_HEIGHT - headerHeight;
 
@@ -112,14 +132,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                    )}
                 </Pressable>
                 <View style={styles.streakContainer}>
-                   <Ionicons name="flash" size={16} color="#F59E0B" />
+                   <MaterialCommunityIcons name="fire" size={20} color="#F59E0B" style={{ marginRight: 2 }} />
                    <Text style={styles.streakText}>{streak}</Text>
                 </View>
             </View>
 
             <View style={styles.topBarRight}>
                 <Pressable onPress={() => navigation.navigate('Personalization')} style={styles.addBtn}>
-                   <Ionicons name="add" size={26} color="#FFF" />
+                   <Image 
+                     source={require('../../assets/add.png')} 
+                     style={styles.addIcon}
+                     resizeMode="contain"
+                   />
                 </Pressable>
             </View>
           </View>
@@ -149,11 +173,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <View style={styles.center}>
               <ActivityIndicator color="#6366F1" size="large" />
             </View>
-          ) : activeTab === 'saved' && bitesData.length === 0 ? (
-            <View style={styles.center}>
-              <Text style={styles.emptyTitle}>Nothing saved yet.</Text>
-              <Text style={styles.emptyText}>Bites you bookmark will appear here.</Text>
-            </View>
           ) : (
             <FlashList
               data={bitesData}
@@ -165,7 +184,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               decelerationRate="fast"
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.id.toString()}
-              onEndReached={() => activeTab !== 'saved' && hasNextPage && !isFetchingNextPage && fetchNextPage()}
+              onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
               refreshControl={
                 <RefreshControl refreshing={isRefetching && !isLoading} onRefresh={refetch} tintColor="#6366F1" />
               }
@@ -192,8 +211,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between', 
-    paddingHorizontal: 20, 
-    paddingVertical: 10 
+    paddingHorizontal: 22, 
+    paddingTop: 16,
+    paddingBottom: 8
   },
   topBarLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 10 },
   topBarCenter: { flex: 2, alignItems: 'center' },
@@ -226,15 +246,23 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4
   },
+  addIcon: { width: 22, height: 22 },
   streakContainer: { 
     flexDirection: 'row', 
-    backgroundColor: 'rgba(245, 158, 11, 0.1)', 
-    paddingHorizontal: 10, 
+    backgroundColor: 'rgba(245, 158, 11, 0.15)', 
+    paddingHorizontal: 12, 
     paddingVertical: 6, 
-    borderRadius: 12,
-    alignItems: 'center'
+    borderRadius: 100, 
+    alignItems: 'center', 
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
   },
-  streakText: { color: '#F59E0B', fontSize: 13, fontWeight: '800', marginLeft: 4 },
+  streakText: { color: '#FBBF24', fontWeight: '900', fontSize: 15, letterSpacing: -0.5 },
   tabWrapper: { marginTop: 4 },
   tabScroll: { paddingHorizontal: 20, gap: 24, paddingBottom: 10 },
   tabBtn: { paddingBottom: 8, alignItems: 'center', minWidth: 40 },

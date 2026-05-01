@@ -2,6 +2,7 @@ package com.techbite.controller;
 
 import com.techbite.dto.ApiResponse;
 import com.techbite.dto.BiteResponseDTO;
+import com.techbite.model.Bite;
 import com.techbite.model.User;
 import com.techbite.repository.BiteRepository;
 import com.techbite.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,14 +55,16 @@ public class BiteController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BiteResponseDTO>>> getAllBites(
+            @AuthenticationPrincipal String firebaseUid,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "publishedAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
         
+        User user = userRepository.findByFirebaseUid(firebaseUid).orElse(null);
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         PageRequest pageRequest = PageRequest.of(page, size, sort);
-        Page<BiteResponseDTO> bites = biteService.getAllBites(pageRequest);
+        Page<BiteResponseDTO> bites = biteService.getAllBites(user, pageRequest);
         return ResponseEntity.ok(ApiResponse.success(bites, "Feed fetched successfully"));
     }
 
@@ -74,6 +78,45 @@ public class BiteController {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<BiteResponseDTO> bites = biteService.getPersonalizedFeed(user, pageRequest);
         return ResponseEntity.ok(ApiResponse.success(bites, "Personalized feed fetched"));
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse<Page<BiteResponseDTO>>> getBitesByCategory(
+            @AuthenticationPrincipal String firebaseUid,
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        User user = userRepository.findByFirebaseUid(firebaseUid).orElse(null);
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<BiteResponseDTO> bites = biteService.getBitesByCategory(user, categoryId, pageRequest);
+        return ResponseEntity.ok(ApiResponse.success(bites, "Category feed fetched"));
+    }
+
+    @PostMapping("/{id}/like")
+    @Transactional
+    public ResponseEntity<ApiResponse<Integer>> likeBite(
+            @AuthenticationPrincipal String firebaseUid,
+            @PathVariable Long id) {
+        
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Bite bite = biteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bite not found"));
+        
+        if (user.getLikedBites().contains(bite)) {
+            // Already liked, optionally unlike it? Let's just return current count for now
+            return ResponseEntity.ok(ApiResponse.success(bite.getEngagementCount(), "Already liked"));
+        }
+        
+        user.getLikedBites().add(bite);
+        bite.setEngagementCount((bite.getEngagementCount() == null ? 0 : bite.getEngagementCount()) + 1);
+        
+        userRepository.save(user);
+        biteRepository.save(bite);
+        
+        return ResponseEntity.ok(ApiResponse.success(bite.getEngagementCount(), "Bite liked"));
     }
 
 

@@ -8,6 +8,18 @@ export const userApi = {
   getPreferences: async () => {
     return apiClient.get<string[]>('/users/preferences');
   },
+
+  getProfile: async () => {
+    return apiClient.get<any>('/users/profile');
+  },
+
+  updateStreak: async () => {
+    return apiClient.post<number>('/users/streak/update', {});
+  },
+
+  getCategories: async () => {
+    return apiClient.get<any[]>('/categories');
+  },
   
   registerOrLogin: async (email: string, displayName: string, photoUrl: string) => {
     return apiClient.post<any>('/users/register-or-login', {

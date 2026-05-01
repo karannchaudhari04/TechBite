@@ -10,3 +10,7 @@ export const getBitesFeed = async (params: { page: number; size: number; filter?
   const endpoint = filter === 'foryou' ? '/bites/foryou' : '/bites';
   return apiClient.get(`${endpoint}?page=${page}&size=${size}`);
 };
+
+export const likeBite = async (id: number): Promise<number> => {
+  return apiClient.post<number>(`/bites/${id}/like`, {});
+};

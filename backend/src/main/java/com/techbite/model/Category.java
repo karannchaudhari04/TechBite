@@ -23,6 +23,9 @@ public class Category {
     @Column(length = 255)
     private String description;
 
+    @Column(name = "follower_count")
+    private Long followerCount = 0L;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

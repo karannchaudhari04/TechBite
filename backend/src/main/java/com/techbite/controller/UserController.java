@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,10 +20,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final com.techbite.service.UserService userService;
 
-    public UserController(UserRepository userRepository, CategoryRepository categoryRepository) {
+    public UserController(UserRepository userRepository, CategoryRepository categoryRepository, com.techbite.service.UserService userService) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.userService = userService;
     }
 
     /**
@@ -30,7 +33,6 @@ public class UserController {
      * Upserts the user record in our DB and returns whether they've set preferences.
      */
     @PostMapping("/register-or-login")
-    @Transactional
     public ResponseEntity<ApiResponse<Map<String, Object>>> registerOrLogin(
             @RequestBody Map<String, String> request) {
 
@@ -39,37 +41,8 @@ public class UserController {
         String displayName = request.get("displayName");
         String photoUrl = request.get("photoUrl");
 
-        User user;
-        try {
-            // 1. Try to find by the new Firebase UID
-            user = userRepository.findByFirebaseUid(firebaseUid).orElseGet(() -> {
-                // 2. If UID is new, check if the EMAIL already exists (User recovery)
-                if (email != null) {
-                    Optional<User> existingByEmail = userRepository.findByEmail(email);
-                    if (existingByEmail.isPresent()) {
-                        User recoveredUser = existingByEmail.get();
-                        recoveredUser.setFirebaseUid(firebaseUid); // Link the new UID
-                        return recoveredUser;
-                    }
-                }
-                
-                // 3. Brand new user (No UID, No Email found)
-                User newUser = new User();
-                newUser.setFirebaseUid(firebaseUid);
-                newUser.setEmail(email != null ? email : firebaseUid + "@unknown.com");
-                return userRepository.saveAndFlush(newUser);
-            });
-        } catch (Exception e) {
-            // If another thread created it at the same time, fetch it
-            user = userRepository.findByFirebaseUid(firebaseUid)
-                    .orElseThrow(() -> new RuntimeException("Race condition error: User could not be created or found."));
-        }
-
-        // Always update profile fields on login
-        if (displayName != null) user.setDisplayName(displayName);
-        if (photoUrl != null) user.setProfilePictureUrl(photoUrl);
-        if (email != null) user.setEmail(email);
-        userRepository.save(user);
+        // Delegate to service for atomic find-or-create logic
+        User user = userService.syncUserWithBackend(firebaseUid, email, displayName, photoUrl);
 
         boolean hasPreferences = user.getPreferences() != null && !user.getPreferences().isEmpty();
 
@@ -99,15 +72,33 @@ public class UserController {
                     .body(ApiResponse.error("At least one category must be selected."));
         }
 
-        // Find matching categories in DB (case-insensitive search)
+        Set<Category> oldPrefs = new HashSet<>(user.getPreferences());
         Set<String> lowerNames = categoryNames.stream().map(String::toLowerCase).collect(Collectors.toSet());
-        Set<Category> matched = categoryRepository.findByNameIgnoreCaseIn(lowerNames);
-        user.setPreferences(matched);
+        Set<Category> newPrefs = categoryRepository.findByNameIgnoreCaseIn(lowerNames);
+        
+        // Increment for new follows
+        for (Category c : newPrefs) {
+            if (!oldPrefs.contains(c)) {
+                c.setFollowerCount((c.getFollowerCount() == null ? 0 : c.getFollowerCount()) + 1);
+                categoryRepository.save(c);
+            }
+        }
+        
+        // Decrement for unfollows
+        for (Category c : oldPrefs) {
+            if (!newPrefs.contains(c)) {
+                long count = (c.getFollowerCount() == null ? 0 : c.getFollowerCount());
+                c.setFollowerCount(Math.max(0, count - 1));
+                categoryRepository.save(c);
+            }
+        }
+
+        user.setPreferences(newPrefs);
         userRepository.save(user);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("savedCount", matched.size());
-        data.put("categories", matched.stream().map(Category::getName).collect(Collectors.toList()));
+        data.put("savedCount", newPrefs.size());
+        data.put("categories", newPrefs.stream().map(Category::getName).collect(Collectors.toList()));
 
         return ResponseEntity.ok(ApiResponse.success(data, "Preferences saved successfully"));
     }
@@ -126,6 +117,54 @@ public class UserController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(ApiResponse.success(names, "Preferences fetched successfully"));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getProfile() {
+        String firebaseUid = getFirebaseUid();
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("streakCount", user.getStreakCount());
+        data.put("email", user.getEmail());
+        data.put("displayName", user.getDisplayName());
+        data.put("photoURL", user.getProfilePictureUrl());
+        data.put("preferencesCount", user.getPreferences().size());
+
+        return ResponseEntity.ok(ApiResponse.success(data, "Profile fetched successfully"));
+    }
+
+    @PostMapping("/streak/update")
+    @Transactional
+    public ResponseEntity<ApiResponse<Integer>> updateStreak() {
+        String firebaseUid = getFirebaseUid();
+        User user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastRead = user.getLastReadAt();
+        
+        if (lastRead == null) {
+            // First time reading
+            user.setStreakCount(1);
+        } else {
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(lastRead.toLocalDate(), now.toLocalDate());
+            
+            if (daysBetween == 1) {
+                // Consecutive day!
+                user.setStreakCount(user.getStreakCount() + 1);
+            } else if (daysBetween > 1) {
+                // Missed a day, reset
+                user.setStreakCount(1);
+            }
+            // If daysBetween == 0, they already read today, so keep current streak
+        }
+        
+        user.setLastReadAt(now);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(ApiResponse.success(user.getStreakCount(), "Streak updated"));
     }
 
     // ─── Helper ─────────────────────────────────────────────────────────────────

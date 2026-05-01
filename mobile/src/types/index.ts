@@ -7,6 +7,8 @@ export interface Bite {
   thumbnailUrl?: string;
   categoryName: string;       // from DTO
   publishedAt?: string;
+  engagementCount?: number;
+  isLiked?: boolean;
 }
 
 export type CategoryColorMap = {

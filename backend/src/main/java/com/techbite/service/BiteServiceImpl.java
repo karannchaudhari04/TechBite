@@ -25,25 +25,31 @@ public class BiteServiceImpl implements BiteService {
     }
 
     @Override
-    public Page<BiteResponseDTO> getAllBites(Pageable pageable) {
-        return biteRepository.findAllByStatusOrderByIdDesc(Bite.Status.PUBLISHED, pageable)
-                .map(this::mapToDTO);
+    public Page<BiteResponseDTO> getAllBites(User user, Pageable pageable) {
+        return biteRepository.findByStatusOrderByPublishedAtDesc(Bite.Status.PUBLISHED, pageable)
+                .map(bite -> mapToDTO(bite, user));
     }
 
     @Override
     public Page<BiteResponseDTO> getPersonalizedFeed(User user, Pageable pageable) {
         if (user == null || user.getPreferences() == null || user.getPreferences().isEmpty()) {
-            return getAllBites(pageable);
+            return getAllBites(user, pageable);
         }
         Page<Bite> bites = biteRepository.findForYouFeedByUserId(user.getId(), Bite.Status.PUBLISHED, pageable);
         if (bites.isEmpty()) {
-            return getAllBites(pageable);
+            return getAllBites(user, pageable);
         }
-        return bites.map(this::mapToDTO);
+        return bites.map(bite -> mapToDTO(bite, user));
+    }
+
+    @Override
+    public Page<BiteResponseDTO> getBitesByCategory(User user, Long categoryId, Pageable pageable) {
+        return biteRepository.findByCategoryIdAndStatusOrderByPublishedAtDesc(categoryId, Bite.Status.PUBLISHED, pageable)
+                .map(bite -> mapToDTO(bite, user));
     }
 
 
-    private BiteResponseDTO mapToDTO(Bite bite) {
+    private BiteResponseDTO mapToDTO(Bite bite, User user) {
         return BiteResponseDTO.builder()
                 .id(bite.getId())
                 .title(bite.getTitle())
@@ -53,6 +59,8 @@ public class BiteServiceImpl implements BiteService {
                 .thumbnailUrl(bite.getThumbnailUrl())
                 .categoryName(bite.getCategory() != null ? bite.getCategory().getName() : "Uncategorized")
                 .publishedAt(bite.getPublishedAt())
+                .engagementCount(bite.getEngagementCount())
+                .isLiked(user != null && user.getLikedBites().contains(bite))
                 .build();
     }
 }

@@ -15,4 +15,6 @@ public class BiteResponseDTO {
     private String thumbnailUrl;
     private String categoryName;
     private LocalDateTime publishedAt;
+    private Integer engagementCount;
+    private Boolean isLiked;
 }

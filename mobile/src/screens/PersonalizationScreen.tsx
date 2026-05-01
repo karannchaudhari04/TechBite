@@ -17,17 +17,16 @@ import { userApi } from '../api/user';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Sample data to match the screenshot's aesthetic
-// Real categories from the backend pillars
-const ALL_TOPICS = [
-  { id: '2', name: 'Artificial Intelligence', followers: '84.3K', emoji: '🤖' },
-  { id: '3', name: 'Web Development', followers: '43.6K', emoji: '✨' },
-  { id: '1', name: 'Data Structures', followers: '44.6K', emoji: '📊' },
-  { id: '6', name: 'System Design', followers: '29.1K', emoji: '🏗️' },
-  { id: '5', name: 'Cybersecurity', followers: '12.5K', emoji: '🛡️' },
-  { id: '4', name: 'Hardware & Chips', followers: '38.4K', emoji: '🔌' },
-  { id: '7', name: 'Open Source', followers: '21.8K', emoji: '🌍' },
-  { id: '8', name: 'Career Tips', followers: '55.2K', emoji: '📈' },
-];
+const TOPIC_METADATA: Record<string, { label: string, emoji: string }> = {
+  'Artificial Intelligence': { label: 'AI & Machine Learning', emoji: '🤖' },
+  'Web Development': { label: 'Web Development', emoji: '✨' },
+  'Data Structures': { label: 'Data Structures', emoji: '📊' },
+  'System Design': { label: 'System Design', emoji: '🏗️' },
+  'Cybersecurity': { label: 'Cybersecurity', emoji: '🛡️' },
+  'Hardware & Chips': { label: 'Hardware & Chips', emoji: '🔌' },
+  'Open Source': { label: 'Open Source', emoji: '🌍' },
+  'Career Tips': { label: 'Career Tips', emoji: '📈' }
+};
 
 interface PersonalizationScreenProps {
   onClose: () => void;
@@ -36,8 +35,14 @@ interface PersonalizationScreenProps {
 export default function PersonalizationScreen({ onClose }: PersonalizationScreenProps) {
   const queryClient = useQueryClient();
   
-  // Fetch current preferences
-  const { data: userPrefs, isLoading } = useQuery({
+  // 1. Fetch real categories from backend
+  const { data: allCategories, isLoading: loadingCats } = useQuery({
+    queryKey: ['allCategories'],
+    queryFn: () => userApi.getCategories()
+  });
+
+  // 2. Fetch current user preferences
+  const { data: userPrefs, isLoading: loadingPrefs } = useQuery({
     queryKey: ['userPreferences'],
     queryFn: () => userApi.getPreferences()
   });
@@ -52,20 +57,27 @@ export default function PersonalizationScreen({ onClose }: PersonalizationScreen
       return userApi.savePreferences(updated);
     },
     onSuccess: () => {
-      // Invalidate both preferences and home feed tabs
+      // Invalidate everything to sync real-time
       queryClient.invalidateQueries({ queryKey: ['userPreferences'] });
+      queryClient.invalidateQueries({ queryKey: ['allCategories'] });
     }
   });
 
-  const renderTopic = ({ item }: { item: typeof ALL_TOPICS[0] }) => {
-    // Exact match logic for real backend sync
+  const renderTopic = ({ item }: { item: any }) => {
     const isFollowing = userPrefs?.some(p => p === item.name);
+    const metadata = TOPIC_METADATA[item.name] || { label: item.name, emoji: '🚀' };
+    
+    // Format follower count (e.g. 1500 -> 1.5K)
+    const formatFollowers = (count: number) => {
+      if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
+      return count.toString();
+    };
 
     return (
       <View style={styles.topicItem}>
         <View style={styles.topicInfo}>
-          <Text style={styles.topicName}>{item.name} {item.emoji}</Text>
-          <Text style={styles.topicFollowers}>{item.followers} Followers</Text>
+          <Text style={styles.topicName}>{metadata.label} {metadata.emoji}</Text>
+          <Text style={styles.topicFollowers}>{formatFollowers(item.followerCount || 0)} Followers</Text>
         </View>
         <Pressable 
           onPress={() => toggleMutation.mutate(item.name)}
@@ -91,21 +103,29 @@ export default function PersonalizationScreen({ onClose }: PersonalizationScreen
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Personalization</Text>
           <Pressable onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="close" size={28} color="#FFF" />
+            <Image 
+              source={require('../../assets/cross.png')} 
+              style={styles.crossIcon}
+              resizeMode="contain"
+            />
           </Pressable>
         </View>
 
         <FlatList
-          data={ALL_TOPICS}
+          data={allCategories}
           renderItem={renderTopic}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={() => (
             <View>
-              {/* Alerts Card Only */}
+              {/* Alerts Card */}
               <Pressable style={styles.settingCard}>
                 <View style={styles.cardIconBox}>
-                  <Ionicons name="notifications-outline" size={24} color="#94A3B8" />
+                  <Image 
+                    source={require('../../assets/noti.png')} 
+                    style={styles.cardIcon}
+                    resizeMode="contain"
+                  />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>Alerts</Text>
@@ -131,10 +151,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', 
     alignItems: 'center', 
     paddingHorizontal: 20, 
-    paddingVertical: 15 
+    paddingTop: 20,
+    paddingBottom: 15 
   },
   headerTitle: { color: '#FFF', fontSize: 20, fontWeight: '800' },
   closeBtn: { padding: 4 },
+  crossIcon: { width: 24, height: 24 },
+  cardIcon: { width: 24, height: 24 },
   
   listContent: { paddingHorizontal: 20, paddingBottom: 40 },
   

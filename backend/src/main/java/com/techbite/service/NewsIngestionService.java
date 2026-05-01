@@ -133,11 +133,16 @@ public class NewsIngestionService {
                             } else {
                                 skippedCount++;
                             }
+                        } catch (QuotaExceededException qe) {
+                            log.error("[NewsIngestion] 🛑 ABORTING: Daily Quota fully exhausted. See you tomorrow!");
+                            this.lastSavedCount = savedCount;
+                            this.lastRunTime = LocalDateTime.now();
+                            return; // Stop the entire engine
                         } catch (Exception e) {
                             log.error("[NewsIngestion] Error processing entry: {}", e.getMessage());
                         }
-                        // Reduced sleep as it's now async, but still keep it for rate limiting
-                        Thread.sleep(5000); 
+                        // Increased sleep to 10s to stay safely under Free Tier 429 limits
+                        Thread.sleep(10000); 
                     }
                 } catch (Exception e) {
                     log.error("[NewsIngestion] Failed to process source {}: {}", source.getName(), e.getMessage());
@@ -170,11 +175,11 @@ public class NewsIngestionService {
         String sourceUrl = entry.getLink();
         if (sourceUrl == null || sourceUrl.isBlank()) return false;
 
-        // Skip articles older than 48 hours to ensure "Fresh News"
+        // Skip articles older than 72 hours to ensure a highly relevant fresh digest
         Date pubDate = entry.getPublishedDate();
         if (pubDate != null) {
             long ageInMillis = System.currentTimeMillis() - pubDate.getTime();
-            long maxAge = 2L * 24 * 60 * 60 * 1000; // 48 hours
+            long maxAge = 72L * 60 * 60 * 1000; // 72 hours
             if (ageInMillis > maxAge) {
                 log.info("[NewsIngestion] Skipping old article ({}h old): {}", ageInMillis / 3600000, entry.getTitle());
                 return false;
@@ -209,22 +214,24 @@ public class NewsIngestionService {
             );
 
         int retryCount = 0;
+        // Expanded 5-model stack for May 2026 for maximum redundancy and quota utilization
         List<String> modelsToTry = List.of(
-            "gemini-2.5-flash", "gemini-2.0-flash", 
-            "gemini-1.5-flash", "gemini-pro"
+            "gemini-3.1-flash-lite-preview", 
+            "gemini-3-flash-preview", 
+            "gemini-2.5-flash-lite", 
+            "gemini-2.5-flash", 
+            "gemini-2.5-pro"
         );
         
         while (retryCount < modelsToTry.size()) {
             String currentModel = modelsToTry.get(retryCount);
             try {
-                // Flash 1.5 often needs v1beta, Pro and 2.0+ use v1
-                String apiVersion = currentModel.contains("1.5") ? "v1beta" : "v1";
-                String url = "https://generativelanguage.googleapis.com/" + apiVersion + "/models/" + currentModel + ":generateContent?key=" + geminiApiKey;
+                String url = "https://generativelanguage.googleapis.com/v1/models/" + currentModel + ":generateContent?key=" + geminiApiKey;
                 
                 Map response = restClient.post()
                     .uri(url)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("User-Agent", "TechBite-News-Aggregator/3.0")
+                    .header("User-Agent", "TechBite-News-Aggregator/2026-Edition")
                     .body(requestBody)
                     .retrieve()
                     .body(Map.class);
@@ -243,7 +250,17 @@ public class NewsIngestionService {
                 log.warn("[NewsIngestion] Model '{}' failed. Details: {}. Trying fallback... (Attempt {}/{})", 
                     currentModel, errorMsg, retryCount + 1, modelsToTry.size());
                 
-                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                // If we hit "Daily Quota Exceeded", stop everything to save resources
+                if (errorMsg.contains("429") && (errorMsg.contains("RequestsPerDay") || errorMsg.contains("RequestsPerMinute"))) {
+                    // Flash-Lite models usually have high RPM but low RPD on free tiers
+                    if (errorMsg.contains("RequestsPerDay")) {
+                        throw new QuotaExceededException(currentModel);
+                    }
+                }
+
+                // Normal rate limit wait
+                int waitTime = errorMsg.contains("429") ? 20000 : 5000;
+                try { Thread.sleep(waitTime); } catch (InterruptedException ignored) {}
                 retryCount++;
             }
             if (retryCount == modelsToTry.size()) return false;
@@ -300,31 +317,28 @@ public class NewsIngestionService {
     private String buildPrompt(String title, String description) {
         String categories = String.join(", ", KNOWN_CATEGORIES);
         return """
-            You are a Senior Tech Lead and Career Mentor at a top tech company. 
-            Your goal is to explain this news to a Computer Science student or a fresher.
+            You are a Senior Architect and Career Mentor at a top-tier tech firm.
+            Your task is to analyze this news and explain it to an ambitious developer.
             
-            Focus on one of these "Career Missions":
-            - Land Internship (Focus on basics & resume value)
-            - Crack FAANG (Focus on scalability, system design, and advanced DSA)
-            - Build Startup (Focus on rapid dev, full-stack, and product MVP)
-            
-            Article:
+            Article to Analyze:
             TITLE: %s
             CONTENT: %s
             
-            Format your response exactly as follows:
-            TITLE: <Punchy, professional title, max 80 characters>
-            CATEGORY: <Choose one from: %s>
+            Format your response EXACTLY as follows:
+            TITLE: <A professional, high-signal title. Avoid clickbait. Max 80 chars>
+            CATEGORY: <Choose the most relevant: %s>
             SUMMARY:
-            • <Major news point or technical update>
-            • <Technical implication or "The Why" behind it>
-            • <CAREER IMPACT: How this helps in an interview or a mission above>
+            • <Core technical change/update. Be specific with versions, numbers, or names>
+            • <The architectural 'Why': Explain the technical reasoning or performance gain>
+            • <Ecosystem Impact: How this changes the way we build or use technology today>
+            • <CAREER MISSION: Explicit advice on how to use this knowledge in a FAANG interview or a Startup role>
             
-            Rules:
+            Strict Rules:
+            - Stick ONLY to the facts in the article. Do not hallucinate.
+            - If the content is vague, focus on the most 'meaningful' technical takeaway.
             - Use the Unicode bullet character (•).
-            - Max 3-4 high-impact bullet points.
-            - If not relevant to a developer's career, respond: SKIP
-            """.formatted(title, description.substring(0, Math.min(description.length(), 1500)), categories);
+            - If the article is not relevant to software engineering or tech careers, respond ONLY with: SKIP
+            """.formatted(title, description.substring(0, Math.min(description.length(), 2000)), categories);
     }
 
     private ParsedBite parseAiResponse(String response, String fallbackTitle, String sourceUrl) {
@@ -374,4 +388,10 @@ public class NewsIngestionService {
     }
 
     private record ParsedBite(String title, String categoryName, String summary) {}
+
+    private static class QuotaExceededException extends RuntimeException {
+        public QuotaExceededException(String model) {
+            super("Daily Quota Exceeded for " + model);
+        }
+    }
 }

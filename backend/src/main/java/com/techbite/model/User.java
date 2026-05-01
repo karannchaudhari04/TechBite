@@ -35,6 +35,12 @@ public class User {
     @Column(columnDefinition = "ENUM('USER', 'ADMIN') DEFAULT 'USER'")
     private Role role = Role.USER;
 
+    @Column(name = "streak_count")
+    private Integer streakCount = 0;
+
+    @Column(name = "last_read_at")
+    private LocalDateTime lastReadAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -48,6 +54,14 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> preferences = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "user_liked_bites",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "bite_id")
+    )
+    private Set<Bite> likedBites = new HashSet<>();
 
     @PreUpdate
     protected void onUpdate() {

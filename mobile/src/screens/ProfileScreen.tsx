@@ -148,6 +148,22 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
         )}
 
+        {/* Content Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your Content</Text>
+          
+          <Pressable 
+            onPress={() => navigation.navigate('Bookmarks')}
+            style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}
+          >
+            <Text style={styles.menuEmoji}>🔖</Text>
+            <Text style={styles.menuLabel}>Saved Bites</Text>
+            <View style={styles.arrowContainer}>
+                <Text style={styles.menuValue}>View All</Text>
+            </View>
+          </Pressable>
+        </View>
+
         {/* Settings Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferences</Text>
@@ -269,6 +285,7 @@ const styles = StyleSheet.create({
   menuEmoji: { fontSize: 18, marginRight: 16 },
   menuLabel: { flex: 1, fontSize: 16, fontWeight: '600', color: '#E2E8F0' },
   menuValue: { fontSize: 14, color: '#7C3AED', fontWeight: 'bold' },
+  arrowContainer: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   adminBtn: {
     flexDirection: 'row',
     alignItems: 'center',

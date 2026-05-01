@@ -56,12 +56,21 @@ export default function AppNavigator() {
   const [currentFlow, setCurrentFlow] = useState<AppScreen>('Welcome');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser); // Restore the user state
       if (currentUser) {
-        // In a real app, you might check profile status here
-        setCurrentFlow('Home');
+        setIsInitializing(true);
+        try {
+          await userApi.registerOrLogin(
+            currentUser.email || '', 
+            currentUser.displayName || 'Tech Explorer', 
+            currentUser.photoURL || ''
+          );
+          setCurrentFlow('Home');
+        } catch (error) {
+          console.error('[AuthSync] Backend sync failed:', error);
+          setCurrentFlow('Home');
+        }
       } else {
         queryClient.removeQueries({ queryKey: ['bookmarks'] });
         queryClient.invalidateQueries({ queryKey: ['bites', 'foryou'] });
@@ -107,8 +116,57 @@ export default function AppNavigator() {
 
   if (isInitializing) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#020617', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#6366F1" />
+      <View style={{ flex: 1, backgroundColor: '#020617', justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+        <View style={{ marginBottom: 40 }}>
+          <View style={{ 
+            width: 120, 
+            height: 120, 
+            borderRadius: 30, 
+            backgroundColor: '#0F172A',
+            shadowColor: '#6366F1',
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.3,
+            shadowRadius: 20,
+            elevation: 15,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <View style={{ width: 80, height: 80, backgroundColor: '#6366F1', borderRadius: 20, transform: [{ rotate: '45deg' }] }} />
+          </View>
+        </View>
+        
+        <View style={{ alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#6366F1" />
+          <View style={{ marginTop: 24, alignItems: 'center' }}>
+             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#6366F1' }} />
+                <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#7C3AED' }} />
+                <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#8B5CF6' }} />
+             </View>
+             <View style={{ alignItems: 'center' }}>
+                <View style={{ height: 1, width: 100, backgroundColor: 'rgba(99, 102, 241, 0.2)', marginBottom: 12 }} />
+                <View style={{ marginBottom: 4 }}>
+                   <View style={{ 
+                      backgroundColor: 'rgba(99, 102, 241, 0.1)', 
+                      paddingHorizontal: 12, 
+                      paddingVertical: 4, 
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: 'rgba(99, 102, 241, 0.2)'
+                   }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                         <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#6366F1' }} />
+                         <View style={{ height: 12, width: 1, backgroundColor: 'rgba(99, 102, 241, 0.3)' }} />
+                         <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#7C3AED' }} />
+                      </View>
+                   </View>
+                </View>
+                <View style={{ marginTop: 8 }}>
+                   <View style={{ height: 1, width: 60, backgroundColor: 'rgba(124, 58, 234, 0.15)' }} />
+                </View>
+             </View>
+          </View>
+        </View>
       </View>
     );
   }
