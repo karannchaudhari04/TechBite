@@ -318,7 +318,7 @@ public class NewsIngestionService {
         String categories = String.join(", ", KNOWN_CATEGORIES);
         return """
             You are a Senior Architect and Career Mentor at a top-tier tech firm.
-            Your task is to analyze this news and explain it to an ambitious developer.
+            Your task is to analyze this news and explain it with deep technical insight to an ambitious developer.
             
             Article to Analyze:
             TITLE: %s
@@ -328,15 +328,17 @@ public class NewsIngestionService {
             TITLE: <A professional, high-signal title. Avoid clickbait. Max 80 chars>
             CATEGORY: <Choose the most relevant: %s>
             SUMMARY:
-            • <Core technical change/update. Be specific with versions, numbers, or names>
-            • <The architectural 'Why': Explain the technical reasoning or performance gain>
-            • <Ecosystem Impact: How this changes the way we build or use technology today>
-            • <CAREER MISSION: Explicit advice on how to use this knowledge in a FAANG interview or a Startup role>
+            • <CORE TECHNICAL DETAILS: Explain the update with specific versions, APIs, or architectural changes. Make this at least 2 detailed sentences.>
+            • <THE ARCHITECTURAL 'WHY': Go deep into the performance gains, trade-offs, or engineering challenges involved. At least 2 sentences.>
+            • <ECOSYSTEM & FUTURE: How this ripples through the tech stack and what it means for modern development patterns. At least 2 sentences.>
+            • <MENTOR MISSION: High-level advice on how to use this knowledge in a FAANG interview or to solve a real-world startup problem. At least 2 sentences.>
             
             Strict Rules:
-            - Stick ONLY to the facts in the article. Do not hallucinate.
-            - If the content is vague, focus on the most 'meaningful' technical takeaway.
+            - YOU MUST PROVIDE EXACTLY 4 BULLET POINTS.
+            - EACH BULLET POINT MUST BE AT LEAST 200 CHARACTERS LONG.
+            - DO NOT be concise. We need high detail to fill a full mobile card.
             - Use the Unicode bullet character (•).
+            - Stick ONLY to the facts in the article. Do not hallucinate.
             - If the article is not relevant to software engineering or tech careers, respond ONLY with: SKIP
             """.formatted(title, description.substring(0, Math.min(description.length(), 2000)), categories);
     }
