@@ -34,8 +34,8 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
   };
 
   const handleLike = async () => {
-    // Spark on every toggle
-    likeScale.value = withSequence(withSpring(1.5), withSpring(1));
+    // Spark both on every toggle
+    triggerSpark();
 
     if (hasLiked) {
       // UNLIKE
@@ -98,9 +98,8 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
 
   const handleToggleBookmark = () => {
     onToggleBookmark(item);
-    if (!isBookmarked) {
-        triggerSpark();
-    }
+    // Spark both on every toggle
+    triggerSpark();
   };
 
   // Split summary into bullets if possible
@@ -172,8 +171,8 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight 
                <Pressable onPress={handleToggleBookmark} style={styles.actionBtn}>
                   <Animated.View style={saveAnimatedStyle}>
                     <Image 
-                      source={require('../../assets/savebite.png')} 
-                      style={[styles.iconAsset, { tintColor: isBookmarked ? "#6366F1" : "#FFF" }]} 
+                      source={isBookmarked ? require('../../assets/save.png') : require('../../assets/savebite.png')} 
+                      style={styles.iconAsset} 
                     />
                   </Animated.View>
                   <Text style={[styles.actionText, isBookmarked && { color: '#6366F1' }]}>Save</Text>
