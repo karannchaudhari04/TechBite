@@ -15,18 +15,6 @@ import Animated, {
   useAnimatedStyle, 
   withSpring 
 } from 'react-native-reanimated';
-import { getAuth } from 'firebase/auth';
-
-// Inside your component or useEffect:
-const getToken = async () => {
-  const auth = getAuth();
-  if (auth.currentUser) {
-    const token = await auth.currentUser.getIdToken();
-    console.log("🔥 MY ADMIN TOKEN:", token);
-  }
-};
-
-getToken();
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -78,7 +66,19 @@ export default function ProfileScreen({ navigation }: any) {
       webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
       iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
     });
-  }, []);
+
+    const getToken = async () => {
+      if (user) {
+        try {
+          const token = await user.getIdToken(true);
+          console.log("🔥 MY ADMIN TOKEN:", token);
+        } catch (e) {
+          console.error("Token error:", e);
+        }
+      }
+    };
+    getToken();
+  }, [user]);
 
   const { data: profile, isLoading, refetch } = useQuery({
     queryKey: ['userProfile'],
