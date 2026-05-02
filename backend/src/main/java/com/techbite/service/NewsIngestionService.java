@@ -290,6 +290,12 @@ public class NewsIngestionService {
         bite.setAuthorAttribution(parseAuthor(entry));
         bite.setCategory(categoryOpt.get());
         bite.setStatus(Bite.Status.PUBLISHED);
+        
+        // Dynamic Fallback: Use category-specific high-quality imagery if no thumbnail is found
+        if (bite.getThumbnailUrl() == null || bite.getThumbnailUrl().isBlank()) {
+            bite.setThumbnailUrl(getCategoryFallbackImage(parsed.categoryName()));
+        }
+
         bite.setPublishedAt(entry.getPublishedDate() != null
                 ? entry.getPublishedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
                 : LocalDateTime.now());
@@ -300,18 +306,47 @@ public class NewsIngestionService {
     }
 
     private String extractImage(SyndEntry entry) {
+        // 1. Try enclosures
         if (entry.getEnclosures() != null && !entry.getEnclosures().isEmpty()) {
             return entry.getEnclosures().get(0).getUrl();
         }
+        
+        // 2. Try foreign markup (media:content, media:thumbnail)
         if (entry.getForeignMarkup() != null) {
-            return entry.getForeignMarkup().stream()
+            String url = entry.getForeignMarkup().stream()
                 .filter(el -> el.getName().equals("content") || el.getName().equals("thumbnail"))
                 .map(el -> el.getAttributeValue("url"))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
+            if (url != null) return url;
         }
+
+        // 3. Try parsing <img> tags from content or description
+        String content = extractText(entry);
+        if (content != null && content.contains("<img")) {
+            Pattern imgPattern = Pattern.compile("<img[^>]+src=\"([^\"]+)\"");
+            Matcher matcher = imgPattern.matcher(content);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        }
+        
         return null;
+    }
+
+    private String getCategoryFallbackImage(String category) {
+        return switch (category) {
+            case "Artificial Intelligence" -> "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=2000";
+            case "Web Development" -> "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2000";
+            case "Cybersecurity" -> "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000";
+            case "Data Structures" -> "https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?auto=format&fit=crop&q=80&w=2000";
+            case "Hardware & Chips" -> "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2000";
+            case "System Design" -> "https://images.unsplash.com/photo-1508921234172-b68ed335b3e6?auto=format&fit=crop&q=80&w=2000";
+            case "Open Source" -> "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=2000";
+            case "Career Tips" -> "https://images.unsplash.com/photo-1454165833767-0274b0596dba?auto=format&fit=crop&q=80&w=2000";
+            default -> "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000";
+        };
     }
 
     private String buildPrompt(String title, String description) {
