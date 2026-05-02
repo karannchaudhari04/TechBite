@@ -37,7 +37,6 @@ public class BiteServiceImpl implements BiteService {
     }
 
     @Override
-    @Transactional
     public void reSummarizeAllBites() {
         log.info("[Migration] 🚀 Starting re-summarization of all bites...");
         List<Bite> allBites = biteRepository.findAll();
