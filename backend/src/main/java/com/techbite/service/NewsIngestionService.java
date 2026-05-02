@@ -285,6 +285,7 @@ public class NewsIngestionService {
         Bite bite = new Bite();
         bite.setTitle(parsed.title());
         bite.setContentSummary(parsed.summary());
+        bite.setContentDescription(entry.getDescription() != null ? entry.getDescription().getValue() : "");
         bite.setThumbnailUrl(thumbUrl);
         bite.setOriginalSourceUrl(sourceUrl);
         bite.setAuthorAttribution(parseAuthor(entry));

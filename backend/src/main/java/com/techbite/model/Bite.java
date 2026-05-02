@@ -30,6 +30,9 @@ public class Bite {
     @Column(name = "content_summary", nullable = false, columnDefinition = "TEXT")
     private String contentSummary;
 
+    @Column(name = "content_description", columnDefinition = "TEXT")
+    private String contentDescription;
+
     @Column(name = "original_source_url", nullable = false, length = 500)
     private String originalSourceUrl;
 
