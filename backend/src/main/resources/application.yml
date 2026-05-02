@@ -34,7 +34,7 @@ spring:
   ai:
     openai:
       api-key: ${GEMINI_API_KEY:${SPRING_AI_OPENAI_API_KEY:AIzaSyD1uik4xJNGVk37d44gUs7SJCdMlO7B7FM}}
-      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      base-url: https://generativelanguage.googleapis.com/v1/openai
       chat:
         options:
           model: gemini-1.5-flash
