@@ -71,38 +71,52 @@ public class BiteServiceImpl implements BiteService {
                     - Stick ONLY to the facts.
                     """.formatted(bite.getTitle(), contentToAnalyze);
 
-                // --- Direct Gemini API Call (Bulletproof Logic) ---
-                String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
-                
-                var requestBody = java.util.Map.of(
-                    "contents", java.util.List.of(
-                        java.util.Map.of("parts", java.util.List.of(
-                            java.util.Map.of("text", prompt)
-                        ))
-                    )
+                // --- Official Latest Generation Stack (May 2026) ---
+                List<String> modelsToTry = List.of(
+                    "gemini-3.1-flash-lite-preview", 
+                    "gemini-3-flash-preview", 
+                    "gemini-2.5-flash-lite", 
+                    "gemini-2.5-flash"
                 );
+                String aiText = null;
 
-                String jsonResponse = restClient.post()
-                        .uri(url)
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .body(requestBody)
-                        .retrieve()
-                        .body(String.class);
-
-                if (jsonResponse != null && jsonResponse.contains("\"text\":")) {
-                    // Simple parsing for the re-summarization tool
-                    String[] parts = jsonResponse.split("\"text\": \"");
-                    if (parts.length > 1) {
-                        String aiText = parts[1].split("\"")[0].replace("\\n", "\n").replace("\\\"", "\"");
+                for (String modelName : modelsToTry) {
+                    try {
+                        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + geminiApiKey;
                         
-                        if (aiText.contains("SUMMARY:")) {
-                            String newSummary = aiText.split("SUMMARY:")[1].trim();
-                            bite.setContentSummary(newSummary);
-                            biteRepository.save(bite);
-                            count++;
-                            log.info("[Migration] ✅ [{}/{}] Updated: {}", count, allBites.size(), bite.getTitle());
+                        var requestBody = java.util.Map.of(
+                            "contents", java.util.List.of(
+                                java.util.Map.of("parts", java.util.List.of(
+                                    java.util.Map.of("text", prompt)
+                                ))
+                            )
+                        );
+
+                        String jsonResponse = restClient.post()
+                                .uri(url)
+                                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                                .body(requestBody)
+                                .retrieve()
+                                .body(String.class);
+
+                        if (jsonResponse != null && jsonResponse.contains("\"text\":")) {
+                            String[] parts = jsonResponse.split("\"text\": \"");
+                            if (parts.length > 1) {
+                                aiText = parts[1].split("\"")[0].replace("\\n", "\n").replace("\\\"", "\"");
+                                break; // Success!
+                            }
                         }
+                    } catch (Exception modelEx) {
+                        log.warn("[Migration] ⚠️ Model {} failed, trying next...", modelName);
                     }
+                }
+
+                if (aiText != null && aiText.contains("SUMMARY:")) {
+                    String newSummary = aiText.split("SUMMARY:")[1].trim();
+                    bite.setContentSummary(newSummary);
+                    biteRepository.save(bite);
+                    count++;
+                    log.info("[Migration] ✅ [{}/{}] Updated: {}", count, allBites.size(), bite.getTitle());
                 }
             } catch (Exception e) {
                 log.error("[Migration] ❌ Failed to re-summarize bite: " + bite.getId(), e);
