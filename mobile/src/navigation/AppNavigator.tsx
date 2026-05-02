@@ -14,6 +14,7 @@ import BookmarksScreen from '../screens/BookmarksScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import BiteDetailScreen from '../screens/BiteDetailScreen';
 import PersonalizationScreen from '../screens/PersonalizationScreen';
+import ArticleScreen from '../screens/ArticleScreen';
 import { userApi } from '../api/user';
 
 const linking = {
@@ -28,6 +29,7 @@ const linking = {
       OnboardingIntro: 'intro',
       Interests: 'interests',
       Personalization: 'personalization',
+      Article: 'article',
     },
   },
 };
@@ -41,6 +43,7 @@ export type RootStackParamList = {
   Bookmarks: undefined;
   Profile: undefined;
   BiteDetail: { id: number };
+  Article: { url: string; title: string };
 };
 
 type AppScreen = 'Welcome' | 'OnboardingIntro' | 'Interests' | 'Home' | 'Personalization';
@@ -229,6 +232,7 @@ export default function AppNavigator() {
         )}
 
         <Stack.Screen name="BiteDetail" component={BiteDetailScreen} />
+        <Stack.Screen name="Article" component={ArticleScreen} options={{ animation: 'slide_from_right' }} />
         
         <Stack.Screen 
           name="Personalization" 

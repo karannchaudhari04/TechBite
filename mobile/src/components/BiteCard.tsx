@@ -11,6 +11,9 @@ import Animated, {
   withSequence 
 } from 'react-native-reanimated';
 import * as WebBrowser from 'expo-web-browser';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import { likeBite } from '../api/bites';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -24,7 +27,8 @@ interface BiteCardProps {
   fullScreen?: boolean;
 }
 
-const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight, fullScreen }: BiteCardProps) => {
+const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight, fullScreen = false }: BiteCardProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const queryClient = useQueryClient();
   const [likes, setLikes] = React.useState(item.engagementCount || 0);
   const [hasLiked, setHasLiked] = React.useState(item.isLiked || false);
@@ -35,12 +39,11 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
     setLocalBookmarked(isBookmarked);
   }, [isBookmarked]);
 
-  const handleOpenSource = async () => {
+  const handleOpenSource = () => {
     if (item.originalSourceUrl) {
-      await WebBrowser.openBrowserAsync(item.originalSourceUrl, {
-        toolbarColor: '#0F172A',
-        enableBarCollapsing: true,
-        showTitle: true,
+      navigation.navigate('Article', { 
+        url: item.originalSourceUrl,
+        title: item.title 
       });
     }
   };
