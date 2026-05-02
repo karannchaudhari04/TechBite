@@ -9,4 +9,5 @@ public interface BiteService {
     Page<BiteResponseDTO> getAllBites(User user, Pageable pageable);
     Page<BiteResponseDTO> getPersonalizedFeed(User user, Pageable pageable);
     Page<BiteResponseDTO> getBitesByCategory(User user, Long categoryId, Pageable pageable);
+    void reSummarizeAllBites();
 }

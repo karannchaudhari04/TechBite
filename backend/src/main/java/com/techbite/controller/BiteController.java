@@ -142,4 +142,15 @@ public class BiteController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getIngestStatus() {
         return ResponseEntity.ok(ApiResponse.success(newsIngestionService.getStatus(), "Status retrieved"));
     }
+
+    @PostMapping("/admin/re-summarize")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> reSummarizeAll() {
+        log.info(">>> [BiteController] Triggering async re-summarization of all bites...");
+        // Running this in a separate thread because it can be slow
+        new Thread(() -> {
+            biteService.reSummarizeAllBites();
+        }).start();
+        return ResponseEntity.ok(ApiResponse.success(null, "Re-summarization started in background"));
+    }
 }
