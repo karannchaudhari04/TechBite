@@ -39,3 +39,17 @@ logging:
     com.techbite: DEBUG
     org.hibernate.SQL: DEBUG
     org.springframework.jdbc.datasource: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    db:
+      enabled: false
+    redis:
+      enabled: false
