@@ -64,7 +64,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "techbite.app",
+              "host": "techbite.onrender.com",
               "pathPrefix": "/bite"
             }
           ],

@@ -35,7 +35,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Health check & Swagger
-                .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/").permitAll()
+                .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/", "/bite/**").permitAll()
                 // Public bite feed
                 .requestMatchers("/api/v1/bites", "/api/v1/bites/foryou", "/api/v1/bites/{id}").permitAll()
                 // Permit register-or-login for initial handshake

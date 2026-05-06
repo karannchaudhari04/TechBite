@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { NotificationService } from './src/utils/NotificationService';
+
 
 import { LogBox } from 'react-native';
 
@@ -37,7 +39,15 @@ export default function App() {
       iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
       offlineAccess: true,
     });
+
+    // Request Notification Permissions
+    NotificationService.requestPermissions().then(granted => {
+      if (granted) {
+        NotificationService.scheduleDailyReminder(0); // Initial schedule
+      }
+    });
   }, []);
+
 
   return (
     <PersistQueryClientProvider 

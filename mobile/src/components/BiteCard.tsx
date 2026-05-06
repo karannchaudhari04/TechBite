@@ -86,7 +86,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
 
   const handleShare = async () => {
     try {
-      const shareLink = `https://techbite.app/bite/${item.id}`;
+      const shareLink = `https://techbite.onrender.com/bite/${item.id}`;
       const message = `🚀 TechBite | High-Yield Tech News\n\nHeadline: ${item.title}\n\nMaster tech, one bite at a time. Read the full "Bite" here: ${shareLink}`;
       
       await Share.share({

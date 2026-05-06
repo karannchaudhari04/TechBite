@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">TechBite | High-Yield Tech News</title>
+    
+    <meta property="og:title" th:content="${title}" />
+    <meta property="og:description" th:content="${summary}" />
+    <meta property="og:image" th:content="${thumbnail}" />
+    <meta property="og:type" content="article" />
+
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #020617;
+            --card-bg: #0F172A;
+            --text: #F8FAFC;
+            --text-dim: #94A3B8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Branding Section */
+        .brand {
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 18px;
+            transform: rotate(45deg);
+            margin: 0 auto 24px;
+            box-shadow: 0 0 40px var(--primary-glow);
+        }
+
+        .brand-name {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(to bottom, #FFF, #6366F1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Shared Bite Card */
+        .bite-card {
+            background: var(--card-bg);
+            border-radius: 40px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            text-align: left;
+        }
+
+        .bite-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        }
+
+        .bite-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .bite-summary {
+            color: var(--text-dim);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* About Section */
+        .about-section {
+            margin-top: 40px;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .feature-box {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .feature-icon { font-size: 24px; margin-bottom: 12px; display: block; }
+        .feature-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+        .feature-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+
+        /* CTA */
+        .cta-btn {
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 18px;
+            display: inline-block;
+            transition: all 0.3s;
+            box-shadow: 0 15px 30px var(--primary-glow);
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+            background: #4F46E5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Logo -->
+        <div class="brand">
+            <div class="logo-box"></div>
+            <div class="brand-name">TECHBITE</div>
+        </div>
+
+        <!-- The Content -->
+        <div class="bite-card">
+            <img th:if="${thumbnail}" th:src="${thumbnail}" class="bite-img" />
+            <h1 class="bite-title" th:text="${title}">Master High-Yield Tech News</h1>
+            <p class="bite-summary" th:text="${summary}">Mastering the tech world shouldn't take hours. TechBite delivers precision-engineered tech insights in 2 minutes or less.</p>
+        </div>
+
+        <a href="techbite://home" class="cta-btn">Open in TechBite App</a>
+
+        <!-- About TechBite -->
+        <div class="about-section">
+            <h2 class="section-title">Why TechBite?</h2>
+            
+            <div class="features">
+                <div class="feature-box">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">AI Summaries</h3>
+                    <p class="feature-desc">High-yield technical news curated by AI for clarity.</p>
+                </div>
+                <div class="feature-box">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">Interview Prep</h3>
+                    <p class="feature-desc">Bite-sized tips for your next big tech interview.</p>
+                </div>
+                <div class="feature-box">
+                    <span class="feature-icon">🔥</span>
+                    <h3 class="feature-title">Daily Streaks</h3>
+                    <p class="feature-desc">Gamified learning to keep your technical edge sharp.</p>
+                </div>
+                <div class="feature-box">
+                    <span class="feature-icon">🏜️</span>
+                    <h3 class="feature-title">Zero Noise</h3>
+                    <p class="feature-desc">No fluff. No distraction. Just the news you need.</p>
+                </div>
+            </div>
+
+            <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px;">
+                Designed for CS students and developers who want to stay ahead without the burnout. 🚀
+            </p>
+        </div>
+
+        <p style="font-size: 12px; color: rgba(255,255,255,0.2); letter-spacing: 3px; font-weight: 900; margin-top: 40px;">
+            MADE BY DEVELOPERS FOR DEVELOPERS
+        </p>
+    </div>
+
+</body>
+</html>
