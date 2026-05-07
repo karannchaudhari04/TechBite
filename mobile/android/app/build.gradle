@@ -111,7 +111,7 @@ android {
         abi {
             enable true
             reset()
-            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            include "arm64-v8a" // ONLY build modern Android to get a direct .apk link
             universalApk false  // Set to false to avoid creating a 100MB+ universal APK
         }
     }
