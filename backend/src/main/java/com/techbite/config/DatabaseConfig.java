@@ -39,6 +39,9 @@ public class DatabaseConfig {
     @Value("${DATABASE_REPLICA_PASSWORD:${spring.datasource.replica.password:}}")
     private String replicaPassword;
 
+    @Value("${spring.jpa.hibernate.ddl-auto:update}")
+    private String ddlAuto;
+
     @Bean
     public DataSource writerDataSource() {
         HikariDataSource ds = new HikariDataSource();
@@ -102,7 +105,7 @@ public class DatabaseConfig {
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.hbm2ddl.auto", ddlAuto);
         properties.setProperty("hibernate.show_sql", "false");
         
         em.setJpaProperties(properties);

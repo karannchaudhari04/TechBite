@@ -138,6 +138,7 @@ public class UserController {
         data.put("preferencesCount", user.getPreferences().size());
         data.put("savedBitesCount", bookmarkRepository.countByUserId(user.getId()));
         data.put("likedBitesCount", userRepository.countLikedBitesByUserId(user.getId()));
+        data.put("role", user.getRole().name());
 
         return ResponseEntity.ok(ApiResponse.success(data, "Profile fetched successfully"));
     }

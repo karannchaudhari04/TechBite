@@ -148,4 +148,32 @@ public class BiteController {
         }).start();
         return ResponseEntity.ok(ApiResponse.success(null, "Re-summarization started in background"));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BiteResponseDTO>> getBiteById(
+            @AuthenticationPrincipal String firebaseUid,
+            @PathVariable Long id) {
+        User user = firebaseUid != null ? userRepository.findByFirebaseUid(firebaseUid).orElse(null) : null;
+        BiteResponseDTO bite = biteService.getBiteById(user, id);
+        return ResponseEntity.ok(ApiResponse.success(bite, "Bite fetched successfully"));
+    }
+
+    @GetMapping("/explain")
+    public ResponseEntity<ApiResponse<String>> explainBiteGet(@RequestParam Long biteId) {
+        if (biteId == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("biteId is required"));
+        }
+        String explanation = biteService.explainBite(biteId);
+        return ResponseEntity.ok(ApiResponse.success(explanation, "Bite explained successfully"));
+    }
+
+    @PostMapping("/explain")
+    public ResponseEntity<ApiResponse<Map<String, String>>> explainBitePost(@RequestBody Map<String, Long> payload) {
+        Long biteId = payload.get("biteId");
+        if (biteId == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("biteId is required"));
+        }
+        String explanation = biteService.explainBite(biteId);
+        return ResponseEntity.ok(ApiResponse.success(Map.of("explanation", explanation), "Bite explained successfully"));
+    }
 }

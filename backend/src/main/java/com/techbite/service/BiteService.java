@@ -9,4 +9,6 @@ public interface BiteService {
     CursorPageResponse<BiteResponseDTO> getPersonalizedFeed(User user, String cursor, int limit);
     CursorPageResponse<BiteResponseDTO> getBitesByCategory(User user, Long categoryId, String cursor, int limit);
     void reSummarizeAllBites();
+    BiteResponseDTO getBiteById(User user, Long id);
+    String explainBite(Long id);
 }

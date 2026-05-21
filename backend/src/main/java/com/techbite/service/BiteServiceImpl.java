@@ -203,6 +203,56 @@ public class BiteServiceImpl implements BiteService {
     }
 
 
+    @Override
+    public BiteResponseDTO getBiteById(User user, Long id) {
+        Bite bite = biteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bite not found"));
+        Set<Long> likedIds = user != null ? userRepository.findLikedBiteIdsByUserId(user.getId()) : Set.of();
+        return mapToDTO(bite, likedIds);
+    }
+
+    @Override
+    public String explainBite(Long id) {
+        Bite bite = biteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bite not found"));
+        
+        String contentToAnalyze = (bite.getContentDescription() != null && !bite.getContentDescription().isEmpty())
+                ? bite.getContentDescription()
+                : bite.getContentSummary();
+
+        String prompt = """
+            You are a Senior Architect and Career Mentor at a top-tier tech firm.
+            Explain the following technology topic/news in a clear, deep-dive technical manner for a CS student or junior engineer.
+            Break down the core architecture, concepts, and why it matters to their career.
+            
+            TITLE: %s
+            CONTENT: %s
+            """.formatted(bite.getTitle(), contentToAnalyze);
+
+        List<String> modelsToTry = List.of(
+            "gemini-2.5-flash",
+            "gemini-3.1-flash-lite-preview", 
+            "gemini-3-flash-preview", 
+            "gemini-2.5-flash-lite"
+        );
+        
+        String aiText = null;
+        for (String modelName : modelsToTry) {
+            try {
+                aiText = callGeminiApi(modelName, prompt);
+                if (aiText != null) break;
+            } catch (Exception e) {
+                log.warn("[Explain] Model {} failed: {}", modelName, e.getMessage());
+            }
+        }
+
+        if (aiText == null) {
+            throw new RuntimeException("All AI models failed to explain this bite.");
+        }
+
+        return aiText;
+    }
+
     private BiteResponseDTO mapToDTO(Bite bite, Set<Long> likedIds) {
         return BiteResponseDTO.builder()
                 .id(bite.getId())

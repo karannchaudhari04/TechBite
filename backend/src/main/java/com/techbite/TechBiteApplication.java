@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import java.util.Map;
 @EnableAsync
 @EnableScheduling
 @EnableCaching
+@EnableSchedulerLock(defaultLockAtMostFor = "10m")
 public class TechBiteApplication {
     private static final Logger log = LoggerFactory.getLogger(TechBiteApplication.class);
 

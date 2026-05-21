@@ -2,11 +2,16 @@ package com.techbite.security;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.Refill;
+import io.github.bucket4j.distributed.proxy.ProxyManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,19 +20,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
 
-    private Bucket createNewBucket(boolean isAuthenticated) {
+    @Autowired
+    private ProxyManager<String> proxyManager;
+
+    private BucketConfiguration createNewBucketConfig(boolean isAuthenticated) {
         long capacity = isAuthenticated ? 200 : 60;
         Refill refill = Refill.greedy(capacity, Duration.ofMinutes(1));
         Bandwidth limit = Bandwidth.classic(capacity, refill);
-        return Bucket.builder().addLimit(limit).build();
+        return BucketConfiguration.builder().addLimit(limit).build();
     }
 
     private Bucket resolveBucket(HttpServletRequest request) {
@@ -43,16 +49,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
             key = "GUEST_" + (xfHeader == null ? request.getRemoteAddr() : xfHeader.split(",")[0]);
         }
         
-        return cache.computeIfAbsent(key, k -> createNewBucket(isAuthenticated));
+        log.debug("[RateLimitFilter] Resolved key: {}, isAuthenticated: {}", key, isAuthenticated);
+        return proxyManager.builder().build(key, () -> createNewBucketConfig(isAuthenticated));
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getRequestURI().startsWith("/api/v1/bites")) {
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/v1/bites")) {
             Bucket bucket = resolveBucket(request);
+            log.info("[RateLimitFilter] Request to URI: {}, Resolved Remote Address: {}", uri, request.getRemoteAddr());
             if (!bucket.tryConsume(1)) {
+                log.warn("[RateLimitFilter] 🛑 RATE LIMIT EXCEEDED for key. Blocking request to {}", uri);
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.getWriter().write("Too many requests. Please try again later.");
                 return;

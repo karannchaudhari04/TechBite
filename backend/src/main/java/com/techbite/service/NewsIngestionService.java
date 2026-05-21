@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.techbite.repository.NewsSourceRepository;
@@ -90,16 +91,19 @@ public class NewsIngestionService {
         );
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    // Disable scheduled automatic bookmark pruning to allow bookmarks to persist indefinitely
+    // @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void cleanupOldBookmarks() {
-        log.info("[System] Starting bookmark cleanup...");
-        LocalDateTime expiryDate = LocalDateTime.now().minusDays(7);
-        bookmarkRepository.deleteByCreatedAtBefore(expiryDate);
-        log.info("[System] Cleaned up bookmarks older than {}", expiryDate);
+        log.info("[System] Scheduled bookmark cleanup is currently disabled.");
     }
 
     @Scheduled(cron = "0 0 */2 * * *")
+    @SchedulerLock(
+        name = "NewsIngestion_scheduledIngest", 
+        lockAtMostFor = "15m", 
+        lockAtLeastFor = "5m"
+    )
     public void scheduledIngest() {
         if (!ingestionEnabled) {
             log.info("[NewsIngestion] Scheduled run skipped (disabled in config)");

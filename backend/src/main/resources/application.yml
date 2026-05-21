@@ -53,3 +53,12 @@ management:
       enabled: false
     redis:
       enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate

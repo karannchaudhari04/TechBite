@@ -114,7 +114,7 @@ export default function ProfileScreen({ navigation }: any) {
     );
   };
 
-  const isAdmin = user && ["karanchaudhari722@gmail.com", "karanchaudhari34804@gmail.com"].includes(user.email || "");
+  const isAdmin = profile?.role === 'ADMIN';
   const [isIngesting, setIsIngesting] = useState(false);
 
   const handleTriggerIngestion = async () => {

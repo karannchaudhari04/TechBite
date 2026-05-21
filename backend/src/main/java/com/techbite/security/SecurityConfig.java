@@ -37,7 +37,7 @@ public class SecurityConfig {
                 // Health check & Swagger
                 .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/", "/bite/**").permitAll()
                 // Public bite feed
-                .requestMatchers("/api/v1/bites", "/api/v1/bites/foryou", "/api/v1/bites/{id}").permitAll()
+                .requestMatchers("/api/v1/bites", "/api/v1/bites/foryou", "/api/v1/bites/{id}", "/api/v1/bites/explain").permitAll()
                 // Permit register-or-login for initial handshake
                 .requestMatchers("/api/v1/users/register-or-login").permitAll()
                 // Strictly lock admin ingestion and bite management
@@ -55,9 +55,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+            "https://techbite.onrender.com",
+            "http://localhost:*",
+            "http://192.168.1.*"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L); // Cache preflight for 1 hour
         

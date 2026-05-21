@@ -129,6 +129,23 @@
       <artifactId>bucket4j-core</artifactId>
       <version>8.10.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.bucket4j</groupId>
+      <artifactId>bucket4j-redis</artifactId>
+      <version>8.10.1</version>
+    </dependency>
+
+    <!-- ShedLock for Distributed Scheduling -->
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-spring</artifactId>
+      <version>5.13.0</version>
+    </dependency>
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-provider-redis-spring</artifactId>
+      <version>5.13.0</version>
+    </dependency>
 
     <!-- Redis for Caching -->
     <dependency>
