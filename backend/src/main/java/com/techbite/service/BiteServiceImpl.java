@@ -283,51 +283,35 @@ public class BiteServiceImpl implements BiteService {
         Bite bite = biteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bite not found"));
 
-        String contentToAnalyze = (bite.getContentDescription() != null && !bite.getContentDescription().isEmpty())
-                ? bite.getContentDescription()
-                : bite.getContentSummary();
+        String contentToAnalyze = bite.getContentSummary();
 
         String prompt = """
-            You are a senior software engineer and mentor at a top tech company. 
-            Your job is to explain complex tech topics in a clear, engaging, and practical way to fellow developers and techies.
+            You are a senior software engineer mentoring fellow developers and techies.
 
-            Explain the following topic using **simple, everyday language** and real-world analogies that make it easy to understand. 
-            Make it interesting and useful for software engineers who want to stay sharp and industry-ready.
+            Explain the following topic in **clear, simple, and engaging language**.
+            Use real-world analogies to make it easy to understand.
 
-            **Strict Rules:**
-            - Total explanation must be between 100 to 150 words.
-            - The response must be complete — never cut off in the middle.
-            - Write in natural, flowing paragraphs.
-            - End with a strong, meaningful concluding sentence.
+            **STRICT REQUIREMENTS:**
+            - Total response must be between 100 and 150 words.
+            - The explanation MUST be complete. NEVER cut off in the middle of a sentence.
+            - Always finish your thought and end with a proper concluding sentence.
+            - Write in natural flowing paragraphs.
+            - Do not use bullet points or markdown.
 
             Topic: %s
-            Original Content: %s
+            Content: %s
 
-            Now give a complete, polished, and easy-to-understand explanation:
+            Provide a complete, polished explanation now:
             """.formatted(bite.getTitle(), contentToAnalyze);
 
-        log.info("[ExplainSimply] Generating simplified explanation for bite {}", id);
-        
-        List<String> modelsToTry = List.of(
-            "gemini-3-flash-preview",
-            "gemini-3.1-flash-lite-preview",
-            "gemini-2.5-pro",
-            "gemini-2.5-flash",
-            "gemini-2.5-flash-lite"
-        );
-        
-        String explanation = null;
-        for (String modelName : modelsToTry) {
-            try {
-                explanation = callGeminiApi(modelName, prompt);
-                if (explanation != null) break;
-            } catch (Exception e) {
-                log.warn("[ExplainSimply] Model {} failed: {}", modelName, e.getMessage());
-            }
-        }
+        String explanation = explainChatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
 
-        if (explanation == null || explanation.isBlank()) {
-            throw new RuntimeException("AI failed to generate a simplified explanation.");
+        // Safety net to avoid truncated responses
+        if (explanation == null || explanation.trim().length() < 80 || explanation.endsWith("\\")) {
+            explanation = "I couldn't generate a complete explanation right now. Please try again or read the original summary.";
         }
 
         return explanation.trim();
