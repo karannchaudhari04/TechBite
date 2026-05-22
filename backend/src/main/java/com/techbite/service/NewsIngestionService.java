@@ -47,9 +47,10 @@ public class NewsIngestionService {
 
     // Categories must match what's in the DB `categories` table
     private static final List<String> KNOWN_CATEGORIES = List.of(
-        "Artificial Intelligence", "Web Development", "Data Structures",
-        "Cybersecurity", "Hardware & Chips", "System Design",
-        "Open Source", "Career Tips"
+        "DSA & Problem Solving", "Web Development", "Mobile Development",
+        "AI & Machine Learning", "Cloud & DevOps", "System Design & Backend",
+        "Cybersecurity", "Data Science & Analytics", "Product & UI/UX",
+        "Open Source & GitHub", "Career & Placements", "Emerging Tech"
     );
 
     private final BiteRepository biteRepository;
@@ -354,14 +355,18 @@ public class NewsIngestionService {
 
     private String getCategoryFallbackImage(String category) {
         return switch (category) {
-            case "Artificial Intelligence" -> "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=2000";
+            case "DSA & Problem Solving" -> "https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&q=80&w=2000";
             case "Web Development" -> "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2000";
+            case "Mobile Development" -> "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=2000";
+            case "AI & Machine Learning" -> "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=2000";
+            case "Cloud & DevOps" -> "https://images.unsplash.com/photo-1618401471353-b98aedd07871?auto=format&fit=crop&q=80&w=2000";
+            case "System Design & Backend" -> "https://images.unsplash.com/photo-1508921234172-b68ed335b3e6?auto=format&fit=crop&q=80&w=2000";
             case "Cybersecurity" -> "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000";
-            case "Data Structures" -> "https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?auto=format&fit=crop&q=80&w=2000";
-            case "Hardware & Chips" -> "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2000";
-            case "System Design" -> "https://images.unsplash.com/photo-1508921234172-b68ed335b3e6?auto=format&fit=crop&q=80&w=2000";
-            case "Open Source" -> "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=2000";
-            case "Career Tips" -> "https://images.unsplash.com/photo-1454165833767-0274b0596dba?auto=format&fit=crop&q=80&w=2000";
+            case "Data Science & Analytics" -> "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000";
+            case "Product & UI/UX" -> "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&q=80&w=2000";
+            case "Open Source & GitHub" -> "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=2000";
+            case "Career & Placements" -> "https://images.unsplash.com/photo-1454165833767-0274b0596dba?auto=format&fit=crop&q=80&w=2000";
+            case "Emerging Tech" -> "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000";
             default -> "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000";
         };
     }

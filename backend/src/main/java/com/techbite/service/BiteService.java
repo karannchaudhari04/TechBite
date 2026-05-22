@@ -11,4 +11,5 @@ public interface BiteService {
     void reSummarizeAllBites();
     BiteResponseDTO getBiteById(User user, Long id);
     String explainBite(Long id);
+    String explainSimply(Long id);
 }

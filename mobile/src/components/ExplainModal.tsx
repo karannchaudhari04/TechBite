@@ -1,42 +1,27 @@
 import React from 'react';
 import { Modal, View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ExplainModalProps {
   visible: boolean;
   onClose: () => void;
-  biteId: number;
   title: string;
+  explanation: string | null;
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
 }
 
-export default function ExplainModal({ visible, onClose, biteId, title }: ExplainModalProps) {
-  const [explanation, setExplanation] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    if (visible && biteId) {
-      fetchExplanation();
-    }
-  }, [visible, biteId]);
-
-  const fetchExplanation = async () => {
-    setLoading(true);
-    setExplanation(null);
-    try {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/bites/explain?biteId=${biteId}`);
-      const json = await response.json();
-      if (json.success) {
-        setExplanation(json.data);
-      } else {
-        setExplanation("AI is catching its breath. Try again in a moment!");
-      }
-    } catch (error) {
-      setExplanation("Connection lost. Please check your signal.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function ExplainModal({ 
+  visible, 
+  onClose, 
+  title, 
+  explanation, 
+  loading, 
+  error, 
+  onRetry 
+}: ExplainModalProps) {
   return (
     <Modal
       animationType="slide"
@@ -53,7 +38,7 @@ export default function ExplainModal({ visible, onClose, biteId, title }: Explai
           
           <ScrollView showsVerticalScrollIndicator={false}>
             <View className="mb-8">
-              <Text className="text-indigo-500 font-black text-[11px] tracking-[4px] uppercase mb-3">AI Deep Dive</Text>
+              <Text className="text-indigo-400 font-black text-[11px] tracking-[4px] uppercase mb-3">AI Deep Dive</Text>
               <Text className="text-white text-2xl font-black leading-8">{title}</Text>
             </View>
 
@@ -62,9 +47,20 @@ export default function ExplainModal({ visible, onClose, biteId, title }: Explai
                 <ActivityIndicator size="large" color="#6366f1" />
                 <Text className="text-slate-500 font-bold mt-4 tracking-widest uppercase text-[10px]">Simplifying for you...</Text>
               </View>
+            ) : error ? (
+              <View className="py-12 items-center justify-center">
+                <Ionicons name="alert-circle-outline" size={48} color="#f87171" />
+                <Text className="text-slate-300 font-bold text-center mt-4 px-4 leading-6">{error}</Text>
+                <Pressable 
+                  onPress={onRetry}
+                  className="mt-8 bg-indigo-600 px-8 py-3.5 rounded-2xl active:scale-[0.98] shadow-lg shadow-indigo-600/30"
+                >
+                  <Text className="text-white font-black uppercase tracking-widest text-[11px]">Retry</Text>
+                </Pressable>
+              </View>
             ) : (
               <View>
-                <Text className="text-slate-300 text-lg font-medium leading-7 mb-10">
+                <Text className="text-slate-200 text-lg font-semibold leading-8 mb-10">
                   {explanation || "Initializing neural insight..."}
                 </Text>
                 

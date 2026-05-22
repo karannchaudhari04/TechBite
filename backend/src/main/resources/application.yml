@@ -29,6 +29,7 @@ spring:
     openai:
       api-key: ${GEMINI_API_KEY}
       base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      explain-api-key: ${GEMINI_EXPLAIN_API_KEY:${GEMINI_API_KEY}}
 
 jwt:
   secret: ${JWT_SECRET}

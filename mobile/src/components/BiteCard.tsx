@@ -16,8 +16,9 @@ import * as WebBrowser from 'expo-web-browser';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { likeBite } from '../api/bites';
-import { useQueryClient } from '@tanstack/react-query';
+import { likeBite, explainBite } from '../api/bites';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import ExplainModal from './ExplainModal';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -44,6 +45,19 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
   React.useEffect(() => {
     setLocalBookmarked(isBookmarked);
   }, [isBookmarked]);
+
+  const [explainModalVisible, setExplainModalVisible] = React.useState(false);
+
+  const explainMutation = useMutation({
+    mutationFn: () => explainBite(item.id),
+  });
+
+  const handleExplainSimply = () => {
+    setExplainModalVisible(true);
+    if (!explainMutation.data && !explainMutation.isPending) {
+      explainMutation.mutate();
+    }
+  };
 
   const handleOpenSource = () => {
     if (item.originalSourceUrl) {
@@ -171,6 +185,25 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                 ))}
             </Animated.ScrollView>
           </View>
+
+          {/* Explain Simply Premium Purple Sparkles Button */}
+          <Pressable 
+            onPress={handleExplainSimply}
+            style={({ pressed }) => [
+              styles.explainBtn,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }
+            ]}
+          >
+            <LinearGradient
+              colors={['#8B5CF6', '#6366F1']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.explainGradient}
+            >
+              <Ionicons name="sparkles" size={14} color="#FFF" style={{ marginRight: 6 }} />
+              <Text style={styles.explainText}>Explain Simply</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
 
         {/* Action Bar */}
@@ -226,6 +259,19 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
         </View>
 
       </View>
+
+      <ExplainModal
+        visible={explainModalVisible}
+        onClose={() => {
+          setExplainModalVisible(false);
+          explainMutation.reset();
+        }}
+        title={item.title}
+        explanation={explainMutation.data?.explanation || null}
+        loading={explainMutation.isPending}
+        error={explainMutation.error ? explainMutation.error.message : null}
+        onRetry={() => explainMutation.mutate()}
+      />
     </View>
   );
 });
@@ -276,7 +322,31 @@ const styles = StyleSheet.create({
   iconAsset: { width: scale(22), height: scale(22) },
 
   progressBar: { height: 2, width: '100%', backgroundColor: 'rgba(255,255,255,0.05)' },
-  progressFill: { height: '100%', backgroundColor: '#6366F1', shadowColor: '#6366F1', shadowRadius: 4, shadowOpacity: 0.5 }
+  progressFill: { height: '100%', backgroundColor: '#6366F1', shadowColor: '#6366F1', shadowRadius: 4, shadowOpacity: 0.5 },
+  explainBtn: {
+    marginVertical: scale(8),
+    borderRadius: scale(16),
+    overflow: 'hidden',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  explainGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(16),
+  },
+  explainText: {
+    color: '#FFFFFF',
+    fontSize: scale(13),
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
 });
 
 export default BiteCard;

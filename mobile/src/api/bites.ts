@@ -14,3 +14,7 @@ export const getBitesFeed = async (params: { page: number; size: number; filter?
 export const likeBite = async (id: number): Promise<number> => {
   return apiClient.post<number>(`/bites/${id}/like`, {});
 };
+
+export const explainBite = async (biteId: number): Promise<{ explanation: string }> => {
+  return apiClient.post<{ explanation: string }>('/bites/explain', { biteId });
+};

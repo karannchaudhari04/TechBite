@@ -19,14 +19,18 @@ const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 
 // Sample data to match the screenshot's aesthetic
 const TOPIC_METADATA: Record<string, { label: string, emoji: string }> = {
-  'Artificial Intelligence': { label: 'AI & Machine Learning', emoji: '🤖' },
-  'Web Development': { label: 'Web Development', emoji: '✨' },
-  'Data Structures': { label: 'Data Structures', emoji: '📊' },
-  'System Design': { label: 'System Design', emoji: '🏗️' },
+  'DSA & Problem Solving': { label: 'DSA & Problem Solving', emoji: '🧠' },
+  'Web Development': { label: 'Web Development', emoji: '💻' },
+  'Mobile Development': { label: 'Mobile Development', emoji: '📱' },
+  'AI & Machine Learning': { label: 'AI & Machine Learning', emoji: '🤖' },
+  'Cloud & DevOps': { label: 'Cloud & DevOps', emoji: '☁️' },
+  'System Design & Backend': { label: 'System Design & Backend', emoji: '🏗️' },
   'Cybersecurity': { label: 'Cybersecurity', emoji: '🛡️' },
-  'Hardware & Chips': { label: 'Hardware & Chips', emoji: '🔌' },
-  'Open Source': { label: 'Open Source', emoji: '🌍' },
-  'Career Tips': { label: 'Career Tips', emoji: '📈' }
+  'Data Science & Analytics': { label: 'Data Science & Analytics', emoji: '📊' },
+  'Product & UI/UX': { label: 'Product & UI/UX', emoji: '🎨' },
+  'Open Source & GitHub': { label: 'Open Source & GitHub', emoji: '🌍' },
+  'Career & Placements': { label: 'Career & Placements', emoji: '💼' },
+  'Emerging Tech': { label: 'Emerging Tech', emoji: '🚀' }
 };
 
 interface PersonalizationScreenProps {

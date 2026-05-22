@@ -163,7 +163,7 @@ public class BiteController {
         if (biteId == null) {
             return ResponseEntity.badRequest().body(ApiResponse.error("biteId is required"));
         }
-        String explanation = biteService.explainBite(biteId);
+        String explanation = biteService.explainSimply(biteId);
         return ResponseEntity.ok(ApiResponse.success(explanation, "Bite explained successfully"));
     }
 
@@ -173,7 +173,7 @@ public class BiteController {
         if (biteId == null) {
             return ResponseEntity.badRequest().body(ApiResponse.error("biteId is required"));
         }
-        String explanation = biteService.explainBite(biteId);
+        String explanation = biteService.explainSimply(biteId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("explanation", explanation), "Bite explained successfully"));
     }
 }

@@ -45,9 +45,10 @@ public class TechBiteApplication {
                 if (categoryRepository.count() == 0) {
                     log.info(">>> [System] Seeding categories...");
                     List<Category> cats = List.of(
-                        "Artificial Intelligence", "Web Development", "Data Structures",
-                        "Cybersecurity", "Hardware & Chips", "System Design", 
-                        "Open Source", "Career Tips"
+                        "DSA & Problem Solving", "Web Development", "Mobile Development",
+                        "AI & Machine Learning", "Cloud & DevOps", "System Design & Backend",
+                        "Cybersecurity", "Data Science & Analytics", "Product & UI/UX",
+                        "Open Source & GitHub", "Career & Placements", "Emerging Tech"
                     ).stream().map(name -> {
                         Category c = new Category();
                         c.setName(name);
@@ -59,14 +60,29 @@ public class TechBiteApplication {
                 if (newsSourceRepository.count() == 0) {
                     log.info(">>> [System] Seeding news sources...");
                     List<com.techbite.model.NewsSource> sources = List.of(
-                        Map.entry("TechCrunch", "https://techcrunch.com/feed/"),
-                        Map.entry("The Verge", "https://www.theverge.com/rss/index.xml"),
-                        Map.entry("Ars Technica", "https://feeds.arstechnica.com/arstechnica/index"),
-                        Map.entry("Hacker News", "https://hnrss.org/frontpage"),
-                        Map.entry("Dev.to", "https://dev.to/feed"),
-                        Map.entry("Wired", "https://www.wired.com/feed/rss"),
+                        Map.entry("Economic Times Tech (ETTech)", "https://economictimes.indiatimes.com/tech/rssfeeds/13357204.cms"),
+                        Map.entry("The Hindu Tech", "https://www.thehindu.com/sci-tech/technology/feeder/default.rss"),
+                        Map.entry("YourStory Tech (Indian Startups)", "https://yourstory.com/category/tech/feed"),
+                        Map.entry("GeeksforGeeks (India DSA/Prep)", "https://www.geeksforgeeks.org/feed/"),
+                        Map.entry("Hacker News (FAANG/System Design)", "https://hnrss.org/frontpage"),
+                        Map.entry("Dev.to (Developer Tutorials)", "https://dev.to/feed"),
                         Map.entry("FreeCodeCamp", "https://www.freecodecamp.org/news/rss/"),
-                        Map.entry("The Hindu Tech", "https://www.thehindu.com/sci-tech/technology/feeder/default.rss")
+                        Map.entry("Gadgets360 (NDTV Tech)", "https://gadgets.ndtv.com/rss/feeds"),
+                        Map.entry("InfoQ (Architecture & Cloud)", "https://feed.infoq.com/"),
+                        Map.entry("AWS Architecture Blog", "https://aws.amazon.com/blogs/architecture/feed/"),
+                        Map.entry("Android Developers Blog", "https://android-developers.googleblog.com/feeds/posts/default"),
+                        Map.entry("Kubernetes Blog (DevOps)", "https://kubernetes.io/feed.xml"),
+                        Map.entry("HackerNoon", "https://hackernoon.com/feed"),
+                        Map.entry("Towards Data Science", "https://towardsdatascience.com/feed"),
+                        Map.entry("Smashing Magazine", "https://www.smashingmagazine.com/feed/"),
+                        Map.entry("GitHub Blog", "https://github.blog/feed/"),
+                        Map.entry("The Kotlin Blog", "https://blog.jetbrains.com/kotlin/feed/"),
+                        Map.entry("Spring Blog", "https://spring.io/blog.xml"),
+                        Map.entry("TechCrunch Startups", "https://techcrunch.com/category/startups/feed/"),
+                        Map.entry("UX Collective", "https://uxdesign.cc/feed"),
+                        Map.entry("KDnuggets", "https://www.kdnuggets.com/feed"),
+                        Map.entry("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/"),
+                        Map.entry("Red Hat Developer", "https://developers.redhat.com/blog/feed")
                     ).stream().map(entry -> {
                         com.techbite.model.NewsSource s = new com.techbite.model.NewsSource();
                         s.setName(entry.getKey());

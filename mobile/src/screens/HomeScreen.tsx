@@ -25,14 +25,18 @@ interface HomeScreenProps {
 }
 
 const ALL_CATEGORY_TABS = [
-  { id: '2', label: 'Artificial Intelligence', type: 'category' as const, cid: 2 },
-  { id: '3', label: 'Web Development', type: 'category' as const, cid: 3 },
-  { id: '1', label: 'Data Structures', type: 'category' as const, cid: 1 },
-  { id: '6', label: 'System Design', type: 'category' as const, cid: 6 },
-  { id: '5', label: 'Cybersecurity', type: 'category' as const, cid: 5 },
-  { id: '8', label: 'Career Tips', type: 'category' as const, cid: 8 },
-  { id: '4', label: 'Hardware & Chips', type: 'category' as const, cid: 4 },
-  { id: '7', label: 'Open Source', type: 'category' as const, cid: 7 },
+  { id: '1', label: 'DSA & Problem Solving', type: 'category' as const, cid: 1 },
+  { id: '2', label: 'Web Development', type: 'category' as const, cid: 2 },
+  { id: '3', label: 'Mobile Development', type: 'category' as const, cid: 3 },
+  { id: '4', label: 'AI & Machine Learning', type: 'category' as const, cid: 4 },
+  { id: '5', label: 'Cloud & DevOps', type: 'category' as const, cid: 5 },
+  { id: '6', label: 'System Design & Backend', type: 'category' as const, cid: 6 },
+  { id: '7', label: 'Cybersecurity', type: 'category' as const, cid: 7 },
+  { id: '8', label: 'Data Science & Analytics', type: 'category' as const, cid: 8 },
+  { id: '9', label: 'Product & UI/UX', type: 'category' as const, cid: 9 },
+  { id: '10', label: 'Open Source & GitHub', type: 'category' as const, cid: 10 },
+  { id: '11', label: 'Career & Placements', type: 'category' as const, cid: 11 },
+  { id: '12', label: 'Emerging Tech', type: 'category' as const, cid: 12 },
 ];
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {

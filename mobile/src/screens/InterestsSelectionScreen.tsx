@@ -17,14 +17,18 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 
 const INTERESTS = [
-  { id: 'Web Development', label: 'Web Development', emoji: '✨' },
-  { id: 'Artificial Intelligence', label: 'AI & Machine Learning', emoji: '🤖' },
-  { id: 'Data Structures', label: 'Data Structures', emoji: '📊' },
-  { id: 'System Design', label: 'System Design', emoji: '🏗️' },
+  { id: 'DSA & Problem Solving', label: 'DSA & Problem Solving', emoji: '🧠' },
+  { id: 'Web Development', label: 'Web Development', emoji: '💻' },
+  { id: 'Mobile Development', label: 'Mobile Development', emoji: '📱' },
+  { id: 'AI & Machine Learning', label: 'AI & Machine Learning', emoji: '🤖' },
+  { id: 'Cloud & DevOps', label: 'Cloud & DevOps', emoji: '☁️' },
+  { id: 'System Design & Backend', label: 'System Design & Backend', emoji: '🏗️' },
   { id: 'Cybersecurity', label: 'Cybersecurity', emoji: '🛡️' },
-  { id: 'Hardware & Chips', label: 'Hardware & Chips', emoji: '🔌' },
-  { id: 'Open Source', label: 'Open Source', emoji: '🌍' },
-  { id: 'Career Tips', label: 'Career Tips', emoji: '📈' },
+  { id: 'Data Science & Analytics', label: 'Data Science & Analytics', emoji: '📊' },
+  { id: 'Product & UI/UX', label: 'Product & UI/UX', emoji: '🎨' },
+  { id: 'Open Source & GitHub', label: 'Open Source & GitHub', emoji: '🌍' },
+  { id: 'Career & Placements', label: 'Career & Placements', emoji: '💼' },
+  { id: 'Emerging Tech', label: 'Emerging Tech', emoji: '🚀' },
 ];
 
 const MIN_TAGS = 3;

@@ -28,16 +28,19 @@ public class BiteServiceImpl implements BiteService {
     private final BiteRepository biteRepository;
     private final UserRepository userRepository;
     private final RestClient restClient;
+    private final ChatClient explainChatClient;
 
     @Value("${spring.ai.openai.api-key}")
     private String geminiApiKey;
 
     public BiteServiceImpl(BiteRepository biteRepository, 
                            UserRepository userRepository,
-                           @org.springframework.context.annotation.Lazy RestClient.Builder restClientBuilder) {
+                           @org.springframework.context.annotation.Lazy RestClient.Builder restClientBuilder,
+                           @org.springframework.beans.factory.annotation.Qualifier("explainChatClient") @org.springframework.context.annotation.Lazy ChatClient explainChatClient) {
         this.biteRepository = biteRepository;
         this.userRepository = userRepository;
         this.restClient = restClientBuilder.build();
+        this.explainChatClient = explainChatClient;
     }
 
     @Override
@@ -267,5 +270,41 @@ public class BiteServiceImpl implements BiteService {
                 .engagementCount(bite.getEngagementCount())
                 .isLiked(likedIds.contains(bite.getId()))
                 .build();
+    }
+
+    @Override
+    public String explainSimply(Long id) {
+        Bite bite = biteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bite not found"));
+
+        String contentToAnalyze = (bite.getContentDescription() != null && !bite.getContentDescription().isEmpty())
+                ? bite.getContentDescription()
+                : bite.getContentSummary();
+
+        String prompt = """
+            You are an encouraging tech mentor who explains complex software concepts to first-year computer science students.
+            Explain the following technology topic or news in an extremely simple, clear, and highly engaging manner.
+            
+            Strict Rules:
+            1. Use a clear real-world analogy to make it intuitive.
+            2. Use simple language and break down any complex engineering terms.
+            3. Keep the total explanation engaging, easy to scan, and strictly under 150-180 words.
+            4. Do not include markdown headers or lists, keep it as cohesive student-friendly paragraphs.
+            
+            TITLE: %s
+            CONTENT: %s
+            """.formatted(bite.getTitle(), contentToAnalyze);
+
+        log.info("[ExplainSimply] Generating simplified explanation for bite {}", id);
+        String explanation = explainChatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
+
+        if (explanation == null || explanation.isBlank()) {
+            throw new RuntimeException("AI failed to generate a simplified explanation.");
+        }
+
+        return explanation.trim();
     }
 }
