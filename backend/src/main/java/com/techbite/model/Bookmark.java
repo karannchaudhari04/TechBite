@@ -7,7 +7,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bookmarks")
+@Table(name = "bookmarks", indexes = {
+    @Index(name = "idx_bookmarks_user_id", columnList = "user_id"),
+    @Index(name = "idx_bookmarks_bite_id", columnList = "bite_id"),
+    @Index(name = "idx_bookmarks_user_bite", columnList = "user_id, bite_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor

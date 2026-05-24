@@ -45,16 +45,15 @@ public class FirebaseJwtAuthenticationFilter extends OncePerRequestFilter {
                 List<GrantedAuthority> authorities = new ArrayList<>();
                 authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
                 
-                // Check database (via cached service) for roles and set User as principal
-                Optional<User> userOpt = userService.getUserByFirebaseUid(uid);
-                Object principal = uid; // String fallback for new/unsynced users
-                if (userOpt.isPresent()) {
-                    User user = userOpt.get();
-                    principal = user;
-                    if (user.getRole() == User.Role.ADMIN) {
-                        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                    }
+                // 1. Fetch user's role from centralized Redis cache to support multi-instance scale
+                String userRole = userService.getUserRole(uid);
+                if ("ADMIN".equals(userRole)) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
                 }
+                
+                // 2. Fetch full User object from local in-memory cache to share across the request
+                Optional<User> userOpt = userService.getUserByFirebaseUid(uid);
+                Object principal = userOpt.isPresent() ? userOpt.get() : uid;
 
                 UsernamePasswordAuthenticationToken authentication = 
                     new UsernamePasswordAuthenticationToken(principal, null, authorities);

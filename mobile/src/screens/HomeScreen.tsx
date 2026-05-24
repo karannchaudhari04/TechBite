@@ -80,8 +80,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   useEffect(() => {
     // Update streak on mount if user is logged in
     if (user) {
-      userApi.updateStreak().then(() => {
-        queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      userApi.updateStreak().then((newStreak) => {
+        // Optimize: Update streak locally in-memory without making a redundant network fetch
+        queryClient.setQueryData(['userProfile'], (oldData: any) => {
+          if (!oldData) return oldData;
+          return { ...oldData, streakCount: newStreak };
+        });
+      }).catch((err) => {
+        console.error('[Streak] Update failed:', err);
       });
     }
   }, [user]);

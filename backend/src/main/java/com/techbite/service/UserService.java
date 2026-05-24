@@ -10,6 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Optional;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 public class UserService {
@@ -51,8 +53,22 @@ public class UserService {
     }
 
     /**
+     * Retrieves and caches the user's role in Redis to secure multi-instance scalability.
+     */
+    @Cacheable(value = "userRoles", key = "#firebaseUid")
+    public String getUserRole(String firebaseUid) {
+        if (firebaseUid == null) {
+            return "USER";
+        }
+        return userRepository.findByFirebaseUid(firebaseUid)
+                .map(user -> user.getRole().name())
+                .orElse("USER");
+    }
+
+    /**
      * Explicitly evicts a user from the cache upon write operations.
      */
+    @CacheEvict(value = "userRoles", key = "#firebaseUid")
     public void evictUserCache(String firebaseUid) {
         if (firebaseUid != null) {
             userCache.remove(firebaseUid);

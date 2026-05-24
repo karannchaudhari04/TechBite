@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_users_firebase_uid", columnList = "firebase_uid")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,7 +53,11 @@ public class User {
     @JoinTable(
         name = "user_preferences",
         joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
+        inverseJoinColumns = @JoinColumn(name = "category_id"),
+        indexes = {
+            @Index(name = "idx_pref_user_category", columnList = "user_id, category_id"),
+            @Index(name = "idx_pref_category_id", columnList = "category_id")
+        }
     )
     private Set<Category> preferences = new HashSet<>();
 
@@ -59,7 +65,11 @@ public class User {
     @JoinTable(
         name = "user_liked_bites",
         joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "bite_id")
+        inverseJoinColumns = @JoinColumn(name = "bite_id"),
+        indexes = {
+            @Index(name = "idx_liked_user_bite", columnList = "user_id, bite_id"),
+            @Index(name = "idx_liked_bite_id", columnList = "bite_id")
+        }
     )
     private Set<Bite> likedBites = new HashSet<>();
 
