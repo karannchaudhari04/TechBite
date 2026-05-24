@@ -3,7 +3,7 @@
 
 import { auth } from '../utils/firebase';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.35:8080/api/v1';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.38:8080/api/v1';
 if (!process.env.EXPO_PUBLIC_API_URL) {
   console.warn('[API] Warning: EXPO_PUBLIC_API_URL is not defined. Falling back to local development URL.');
 }
