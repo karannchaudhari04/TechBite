@@ -19,11 +19,13 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
-/** Builds headers, injecting Authorization: Bearer <token> when available. */
+/** Builds headers, injecting Authorization: Bearer <token> when available and timezone details. */
 async function buildHeaders(extra: Record<string, string> = {}): Promise<Record<string, string>> {
   const token = await getAuthToken();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return {
     'Content-Type': 'application/json',
+    'X-User-Timezone': timezone,
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...extra,
   };
