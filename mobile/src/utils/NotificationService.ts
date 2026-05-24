@@ -67,7 +67,7 @@ export const NotificationService = {
         hour: 9, // 9:00 AM
         minute: 0,
         repeats: true,
-      },
+      } as any,
     });
     
     console.info('[Notifications] Daily reminder scheduled for 9:00 AM');

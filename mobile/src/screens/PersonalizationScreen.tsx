@@ -52,7 +52,7 @@ export default function PersonalizationScreen({ onClose }: PersonalizationScreen
     queryFn: () => userApi.getPreferences()
   });
 
-  // Toggle interest mutation
+  // Toggle interest mutation with instant Optimistic Updates!
   const toggleMutation = useMutation({
     mutationFn: async (categoryName: string) => {
       const current = userPrefs || [];
@@ -61,8 +61,31 @@ export default function PersonalizationScreen({ onClose }: PersonalizationScreen
         : [...current, categoryName];
       return userApi.savePreferences(updated);
     },
+    onMutate: async (categoryName) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['userPreferences'] });
+
+      // Snapshot the previous state
+      const previousPrefs = queryClient.getQueryData<string[]>(['userPreferences']) || [];
+
+      // Optimistically update to the new value instantly
+      const updatedPrefs = previousPrefs.includes(categoryName)
+        ? previousPrefs.filter(c => c !== categoryName)
+        : [...previousPrefs, categoryName];
+        
+      queryClient.setQueryData(['userPreferences'], updatedPrefs);
+
+      // Return context with previous value for rollback
+      return { previousPrefs };
+    },
+    onError: (err, categoryName, context) => {
+      // Rollback to the snapshot if mutation fails
+      if (context?.previousPrefs) {
+        queryClient.setQueryData(['userPreferences'], context.previousPrefs);
+      }
+    },
     onSuccess: () => {
-      // Invalidate everything to sync real-time
+      // Quietly invalidate in background to ensure sync
       queryClient.invalidateQueries({ queryKey: ['userPreferences'] });
       queryClient.invalidateQueries({ queryKey: ['allCategories'] });
     }

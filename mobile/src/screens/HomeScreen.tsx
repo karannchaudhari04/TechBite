@@ -11,6 +11,7 @@ import { useBookmarks } from '../hooks/useBookmarks';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '../api/user';
@@ -103,6 +104,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const bitesData = useMemo(() => {
     return data ? data.pages.flatMap(page => page.content) : [];
   }, [data]);
+
+  const activeIndexRef = React.useRef(0);
+
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: any[] }) => {
+    if (viewableItems.length > 0) {
+      const index = viewableItems[0].index;
+      if (index !== null && index !== undefined && index !== activeIndexRef.current) {
+        activeIndexRef.current = index;
+        // Trigger a subtle, light feedback tap when snapping into the next card
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      }
+    }
+  }, []);
+
+  const viewabilityConfig = React.useMemo(() => ({
+    itemVisiblePercentThreshold: 80
+  }), []);
 
   const itemHeight = SCREEN_HEIGHT - headerHeight;
 
@@ -197,6 +215,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               refreshControl={
                 <RefreshControl refreshing={isRefetching && !isLoading} onRefresh={refetch} tintColor="#6366F1" />
               }
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
             />
           )}
         </View>

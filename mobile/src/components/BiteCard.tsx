@@ -13,6 +13,7 @@ import Animated, {
   withSequence 
 } from 'react-native-reanimated';
 import * as WebBrowser from 'expo-web-browser';
+import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -41,10 +42,12 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
   const [hasLiked, setHasLiked] = React.useState(item.isLiked || false);
   const [localBookmarked, setLocalBookmarked] = React.useState(isBookmarked);
 
-  // Sync with prop if changed from elsewhere
+  // Sync states when FlashList recycles this card for a new item (separates likes/bookmarks per bite)
   React.useEffect(() => {
+    setLikes(item.engagementCount || 0);
+    setHasLiked(item.isLiked || false);
     setLocalBookmarked(isBookmarked);
-  }, [isBookmarked]);
+  }, [item.id, item.engagementCount, item.isLiked, isBookmarked]);
 
   const [explainModalVisible, setExplainModalVisible] = React.useState(false);
 
@@ -53,6 +56,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
   });
 
   const handleExplainSimply = () => {
+    Haptics.selectionAsync().catch(() => {});
     setExplainModalVisible(true);
     if (!explainMutation.data && !explainMutation.isPending) {
       explainMutation.mutate();
@@ -86,6 +90,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
       }
     } else {
       // LIKE
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       setLikes(prev => prev + 1);
       setHasLiked(true);
       try {
@@ -131,6 +136,10 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
     
     // Subtle pop for save only
     saveScale.value = withSequence(withSpring(1.3), withSpring(1));
+    
+    if (newState) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    }
     
     onToggleBookmark(item);
   };
