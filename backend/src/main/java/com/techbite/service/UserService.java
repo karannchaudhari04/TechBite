@@ -60,6 +60,15 @@ public class UserService {
     }
 
     /**
+     * Periodically sweeps the cache to actively prune expired entries from memory.
+     * Prevents memory leaks by ensuring inactive user entries are purged.
+     */
+    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 60000)
+    public void cleanupExpiredCache() {
+        userCache.values().removeIf(UserCacheEntry::isExpired);
+    }
+
+    /**
      * Atomically ensures a user exists by UID or Email.
      * Uses REQUIRES_NEW to ensure the record is committed immediately,
      * preventing race conditions with parallel requests.
