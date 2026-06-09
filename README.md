@@ -112,5 +112,5 @@ If you are a recruiter reviewing this project, here are the key engineering chal
 ---
 
 <div align="center">
-  <i>Made with ❤️ by developers, for developers.</i>
+  <i>Made with ❤️ by developer, for developers.</i>
 </div>
