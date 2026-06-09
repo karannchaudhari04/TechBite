@@ -60,20 +60,7 @@ This project moves beyond standard CRUD apps by implementing **Enterprise-grade 
 - Implemented a custom `CacheErrorHandler` ensuring that if the Redis node goes down, the application gracefully falls back to database reads instead of throwing 500 Internal Server Errors.
 
 ### 4. Extreme Mobile Optimization
-- **Sub-30MB APK**: Achieved by enabling Android ABI Splitting in Gradle and utilizing Hermes engine.
 - **Instant TTI (Time to Interactive)**: UI rendering is decoupled from network requests using React Query with local Async Storage persistence. 
-
----
-
-## 📸 Screenshots
-
-<div align="center">
-  <!-- Note: Update image paths with actual deployed screenshots later -->
-  <img src="https://via.placeholder.com/250x500.png?text=Feed+Screen" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Personalization" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Bookmarks" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Profile" width="22%" />
-</div>
 
 ---
 
