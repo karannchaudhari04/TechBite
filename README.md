@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="mobile/assets/logo.png" alt="TechBite Logo" width="120" />
   <h1>TechBite</h1>
   <p><b>Master High-Yield Tech News in 2 Minutes a Day.</b></p>
   <p><i>A mobile-first, AI-powered short news app designed for Computer Science students and software engineers.</i></p>
@@ -15,7 +14,7 @@
 
 ## 📖 Overview
 
-**TechBite** solves the "information overload" problem for tech professionals and students. Instead of scrolling through endless articles, TechBite automatically scrapes top tech blogs, uses **Google Gemini AI** to summarize them into 80-150 word "bites", and delivers them in a highly addictive, frictionless vertical feed (similar to TikTok/Shorts).
+**TechBite** solves the "information overload" problem for tech professionals and students. Instead of scrolling through endless articles, TechBite automatically scrapes top tech blogs, uses **Google Gemini AI** to summarize them into 80-150 word "bites", and delivers them in a highly addictive, frictionless vertical scrolable feed.
 
 Engineered as a **production-ready distributed system**, TechBite is capable of high-concurrency traffic through horizontal scaling, database read/write splitting, and aggressive caching.
 
@@ -27,7 +26,7 @@ Engineered as a **production-ready distributed system**, TechBite is capable of 
 - **🤖 AI-Powered Summaries**: Automated background ingestion pipeline utilizing Gemini AI to extract key insights.
 - **🧠 Personalized "For You"**: Tailored content delivery based on user-selected interests (DSA, AI, Web Dev, etc.).
 - **🔥 Daily Streaks & Gamification**: Push notifications and streak tracking to build consistent learning habits.
-- **🔖 Bookmarks & Social Sharing**: Save crucial interview prep tips or share dynamic deep links that redirect directly into the app.
+- **🔖 Bookmarks**: Save crucial interview prep tips.
 - **🔐 Secure Stateless Auth**: Seamless Google Sign-In backed by Firebase Admin SDK and stateless JWT verification.
 
 ---
@@ -61,20 +60,7 @@ This project moves beyond standard CRUD apps by implementing **Enterprise-grade 
 - Implemented a custom `CacheErrorHandler` ensuring that if the Redis node goes down, the application gracefully falls back to database reads instead of throwing 500 Internal Server Errors.
 
 ### 4. Extreme Mobile Optimization
-- **Sub-30MB APK**: Achieved by enabling Android ABI Splitting in Gradle and utilizing Hermes engine.
 - **Instant TTI (Time to Interactive)**: UI rendering is decoupled from network requests using React Query with local Async Storage persistence. 
-
----
-
-## 📸 Screenshots
-
-<div align="center">
-  <!-- Note: Update image paths with actual deployed screenshots later -->
-  <img src="https://via.placeholder.com/250x500.png?text=Feed+Screen" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Personalization" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Bookmarks" width="22%" />
-  <img src="https://via.placeholder.com/250x500.png?text=Profile" width="22%" />
-</div>
 
 ---
 
@@ -126,5 +112,5 @@ If you are a recruiter reviewing this project, here are the key engineering chal
 ---
 
 <div align="center">
-  <i>Made with ❤️ by developers, for developers.</i>
+  <i>Made with ❤️ by developer, for developers.</i>
 </div>
