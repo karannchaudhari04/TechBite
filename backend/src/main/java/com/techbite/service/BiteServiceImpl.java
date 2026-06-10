@@ -171,7 +171,12 @@ public class BiteServiceImpl implements BiteService {
             cursorId = Long.parseLong(parts[1]);
         }
         
-        List<Bite> bites = biteRepository.findNextPage(Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        List<Bite> bites;
+        if (user != null) {
+            bites = biteRepository.findNextPageExcludeViewed(user.getId(), Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        } else {
+            bites = biteRepository.findNextPage(Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        }
         return buildCursorResponse(bites, limit, likedIds);
     }
 
@@ -190,7 +195,7 @@ public class BiteServiceImpl implements BiteService {
             cursorId = Long.parseLong(parts[1]);
         }
         
-        List<Bite> bites = biteRepository.findForYouNextPage(user.getId(), Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        List<Bite> bites = biteRepository.findForYouNextPageExcludeViewed(user.getId(), Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
         
         if (bites.isEmpty() && cursor == null) {
             return getAllBites(user, cursor, limit);
@@ -209,7 +214,12 @@ public class BiteServiceImpl implements BiteService {
             cursorId = Long.parseLong(parts[1]);
         }
         
-        List<Bite> bites = biteRepository.findCategoryNextPage(categoryId, Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        List<Bite> bites;
+        if (user != null) {
+            bites = biteRepository.findCategoryNextPageExcludeViewed(user.getId(), categoryId, Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        } else {
+            bites = biteRepository.findCategoryNextPage(categoryId, Bite.Status.PUBLISHED, cursorDate, cursorId, PageRequest.of(0, limit + 1));
+        }
         return buildCursorResponse(bites, limit, likedIds);
     }
 
@@ -368,5 +378,25 @@ public class BiteServiceImpl implements BiteService {
         }
 
         return explanation.trim();
+    }
+
+    @Override
+    @Transactional
+    public void markBitesAsViewed(User user, List<Long> biteIds) {
+        if (user == null || biteIds == null || biteIds.isEmpty()) {
+            return;
+        }
+        for (Long biteId : biteIds) {
+            biteRepository.insertViewedBite(user.getId(), biteId);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> getViewedBiteIds(User user) {
+        if (user == null) {
+            return Set.of();
+        }
+        return biteRepository.findViewedBiteIdsByUserId(user.getId());
     }
 }

@@ -69,3 +69,16 @@ CREATE TABLE bookmarks (
     FOREIGN KEY (bite_id) REFERENCES bites(id) ON DELETE CASCADE,
     INDEX idx_user_bookmark (user_id, created_at DESC) -- Fetch latest bookmarks quickly
 );
+
+-- 6. User Viewed Bites Table (Users <-> Bites)
+-- Tracks which bites a user has viewed to exclude them from main feeds.
+CREATE TABLE user_viewed_bites (
+    user_id BIGINT NOT NULL,
+    bite_id BIGINT NOT NULL,
+    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, bite_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (bite_id) REFERENCES bites(id) ON DELETE CASCADE,
+    INDEX idx_user_viewed (user_id)
+);
+

@@ -18,3 +18,12 @@ export const likeBite = async (id: number): Promise<number> => {
 export const explainBite = async (biteId: number): Promise<{ explanation: string }> => {
   return apiClient.post<{ explanation: string }>('/bites/explain', { biteId });
 };
+
+export const markBitesAsViewed = async (biteIds: number[]): Promise<void> => {
+  return apiClient.post('/bites/viewed', { biteIds });
+};
+
+export const getViewedBiteIds = async (): Promise<number[]> => {
+  return apiClient.get<number[]>('/bites/viewed');
+};
+

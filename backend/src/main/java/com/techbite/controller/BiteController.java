@@ -22,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import com.techbite.service.UserService;
 
@@ -180,6 +182,31 @@ public class BiteController {
         }
         String explanation = biteService.explainSimply(biteId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("explanation", explanation), "Bite explained successfully"));
+    }
+
+    @PostMapping("/viewed")
+    public ResponseEntity<ApiResponse<Void>> markBitesAsViewed(
+            @AuthenticationPrincipal Object principal,
+            @RequestBody Map<String, List<Long>> payload) {
+        User user = resolveUser(principal);
+        if (user == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+        }
+        List<Long> biteIds = payload.get("biteIds");
+        if (biteIds != null && !biteIds.isEmpty()) {
+            biteService.markBitesAsViewed(user, biteIds);
+        }
+        return ResponseEntity.ok(ApiResponse.success(null, "Bites marked as viewed"));
+    }
+
+    @GetMapping("/viewed")
+    public ResponseEntity<ApiResponse<Set<Long>>> getViewedBiteIds(@AuthenticationPrincipal Object principal) {
+        User user = resolveUser(principal);
+        if (user == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+        }
+        Set<Long> viewedIds = biteService.getViewedBiteIds(user);
+        return ResponseEntity.ok(ApiResponse.success(viewedIds, "Fetched viewed bite IDs"));
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────────

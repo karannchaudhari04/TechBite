@@ -8,6 +8,7 @@ import BiteCard from '../components/BiteCard';
 import { Bite } from '../types';
 import { useBites } from '../hooks/useBites';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { useViewedBites } from '../hooks/useViewedBites';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -106,6 +107,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   } = useBites(activeTab.type, (activeTab as any).cid);
   
   const { bookmarks, isBookmarked, toggleBookmark } = useBookmarks();
+  const { markAsViewed } = useViewedBites();
 
   const bitesData = useMemo(() => {
     return data ? data.pages.flatMap(page => page.content) : [];
@@ -116,13 +118,21 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: any[] }) => {
     if (viewableItems.length > 0) {
       const index = viewableItems[0].index;
-      if (index !== null && index !== undefined && index !== activeIndexRef.current) {
-        activeIndexRef.current = index;
-        // Trigger a subtle, light feedback tap when snapping into the next card
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      if (index !== null && index !== undefined) {
+        if (index !== activeIndexRef.current) {
+          activeIndexRef.current = index;
+          // Trigger a subtle, light feedback tap when snapping into the next card
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        }
+        
+        // Mark the active item as viewed
+        const activeItem = viewableItems[0].item as Bite;
+        if (activeItem && activeItem.id) {
+          markAsViewed(activeItem.id);
+        }
       }
     }
-  }, []);
+  }, [markAsViewed]);
 
   const viewabilityConfig = React.useMemo(() => ({
     itemVisiblePercentThreshold: 80

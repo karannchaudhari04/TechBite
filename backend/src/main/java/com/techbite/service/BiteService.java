@@ -12,4 +12,6 @@ public interface BiteService {
     BiteResponseDTO getBiteById(User user, Long id);
     String explainBite(Long id);
     String explainSimply(Long id);
+    void markBitesAsViewed(User user, java.util.List<Long> biteIds);
+    java.util.Set<Long> getViewedBiteIds(User user);
 }
