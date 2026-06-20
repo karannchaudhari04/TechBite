@@ -51,7 +51,7 @@ public class DatabaseConfig {
         ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
         ds.setMaximumPoolSize(10);
         ds.setMaxLifetime(300000); // 5 minutes to prevent connection pool validation warnings
-        ds.setConnectionInitSql("SET SESSION tidb_enable_noop_functions = 1;");
+        ds.setConnectionInitSql("SET SESSION tidb_enable_noop_functions = 1");
         return ds;
     }
 
@@ -65,10 +65,7 @@ public class DatabaseConfig {
         ds.setMaximumPoolSize(20);
         ds.setMaxLifetime(300000); // 5 minutes to prevent connection pool validation warnings
         
-        // AP Theorem Implementation: Enable TiDB Stale Reads / Follower Reads
-        // This prioritizes Availability over Consistency for read-only traffic.
-        // Also enable no-op functions for transaction read-only support.
-        ds.setConnectionInitSql("SET SESSION tidb_enable_noop_functions = 1; SET tidb_replica_read = 'leader-and-follower';");
+        ds.setConnectionInitSql("SET SESSION tidb_enable_noop_functions = 1, tidb_replica_read = 'leader-and-follower'");
         
         return ds;
     }

@@ -1,7 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, Linking, StyleSheet, Dimensions, Share, Platform } from 'react-native';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
+import { View, Text, Pressable, StyleSheet, Dimensions, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { Bite } from '../types';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -53,14 +51,19 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
 
   const explainBtnScale = useSharedValue(1);
   const explainGlow = useSharedValue(0);
-  const rotateVal = useSharedValue(0);
+  const botBob = useSharedValue(0);
+  const sparkleScale = useSharedValue(0.8);
+  const sparkleOpacity = useSharedValue(0.4);
 
   React.useEffect(() => {
-    // Infinite slow rotation for the sparkles icon
-    rotateVal.value = withRepeat(
-      withTiming(360, { duration: 3500, easing: Easing.linear }),
+    // Infinite slow bobbing loop for robot mascot
+    botBob.value = withRepeat(
+      withSequence(
+        withTiming(-3, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        withTiming(3, { duration: 1200, easing: Easing.inOut(Easing.ease) })
+      ),
       -1,
-      false
+      true
     );
 
     // Infinite breathing glow loop
@@ -68,6 +71,25 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
       withSequence(
         withTiming(1, { duration: 1500 }),
         withTiming(0, { duration: 1500 })
+      ),
+      -1,
+      true
+    );
+
+    // Infinite scale/opacity twinkle loop for sparkles
+    sparkleScale.value = withRepeat(
+      withSequence(
+        withTiming(1.3, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.7, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      true
+    );
+
+    sparkleOpacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 1000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       true
@@ -85,9 +107,23 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
     };
   });
 
-  const rotateStyle = useAnimatedStyle(() => {
+  const botBobStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotateVal.value}deg` }]
+      transform: [{ translateY: botBob.value }]
+    };
+  });
+
+  const sparkleStyle1 = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: sparkleScale.value }],
+      opacity: sparkleOpacity.value
+    };
+  });
+
+  const sparkleStyle2 = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: interpolate(sparkleScale.value, [0.7, 1.3], [1.3, 0.7]) }],
+      opacity: interpolate(sparkleOpacity.value, [0.3, 1], [1, 0.3])
     };
   });
 
@@ -114,19 +150,7 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
     }
   };
 
-  const handleShare = async () => {
-    try {
-      const shareLink = `https://techbite.onrender.com/bite/${item.id}`;
-      const message = `💡 ${item.title}\n\nRead the full high-yield breakdown on TechBite:\n🔗 ${shareLink}\n\n⚡ Master tech news & system design concepts in 2 minutes or less!`;
-      
-      await Share.share({
-        message: message,
-        url: shareLink,
-      });
-    } catch (error) {
-      console.error('[Growth] Share failed:', error);
-    }
-  };
+
 
   // Spark Animations
   const saveScale = useSharedValue(1);
@@ -231,10 +255,20 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                   end={{ x: 1, y: 0 }}
                   style={styles.explainGradient}
                 >
-                  <Animated.View style={[rotateStyle, { position: 'absolute', opacity: 0.45 }]}>
-                    <Ionicons name="sparkles" size={32} color="#FFF" />
+                  {/* Top-Left Sparkle */}
+                  <Animated.View style={[sparkleStyle1, { position: 'absolute', top: scale(8), left: scale(8) }]}>
+                    <Ionicons name="sparkles" size={10} color="#FFF" />
                   </Animated.View>
-                  <MaterialCommunityIcons name="robot" size={24} color="#FFF" />
+
+                  {/* Bottom-Right Sparkle */}
+                  <Animated.View style={[sparkleStyle2, { position: 'absolute', bottom: scale(8), right: scale(8) }]}>
+                    <Ionicons name="sparkles" size={10} color="#FFF" />
+                  </Animated.View>
+
+                  {/* Bobbing Robot Mascot Head */}
+                  <Animated.View style={botBobStyle}>
+                    <MaterialCommunityIcons name="robot" size={24} color="#FFF" />
+                  </Animated.View>
                 </LinearGradient>
               </Animated.View>
             </Pressable>
@@ -247,15 +281,6 @@ const BiteCard = React.memo(({ item, isBookmarked, onToggleBookmark, cardHeight,
                     contentFit="contain"
                   />
                   <Text style={styles.actionText}>Source</Text>
-                </Pressable>
-
-                <Pressable onPress={handleShare} style={styles.actionBtn}>
-                  <Image 
-                    source={require('../../assets/share.png')} 
-                    style={styles.iconAsset} 
-                    contentFit="contain"
-                  />
-                  <Text style={styles.actionText}>Share</Text>
                 </Pressable>
             </View>
         </View>

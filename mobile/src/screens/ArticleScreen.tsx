@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Share, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,18 +14,6 @@ export default function ArticleScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const progress = useSharedValue(0);
-
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `Check out this article on TechBite: ${title}\n${url}`,
-        url: url,
-        title: title,
-      });
-    } catch (error) {
-      console.error('Error sharing article:', error);
-    }
-  };
 
   const progressStyle = useAnimatedStyle(() => ({
     width: `${progress.value * 100}%`,
@@ -51,13 +39,7 @@ export default function ArticleScreen({ route, navigation }: Props) {
             </View>
           </View>
 
-          <TouchableOpacity 
-            onPress={handleShare} 
-            style={styles.iconButton}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="share-outline" size={22} color="#FFF" />
-          </TouchableOpacity>
+          <View style={{ width: 44 }} />
         </View>
         
         {/* Animated Progress Bar */}
