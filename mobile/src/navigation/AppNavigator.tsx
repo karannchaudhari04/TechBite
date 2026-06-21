@@ -107,8 +107,14 @@ export default function AppNavigator() {
     setCurrentFlow('Interests');
   }, []);
 
-  const handleSkip = useCallback(() => {
+  const handleSkip = useCallback((navigation: any) => {
     setCurrentFlow('Home');
+    setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    }, 0);
   }, []);
 
   const handleInterestsComplete = useCallback(async (tags: string[]) => {
@@ -194,7 +200,7 @@ export default function AppNavigator() {
             {(props) => (
               <WelcomeScreen
                 {...props}
-                onSkip={handleSkip}
+                onSkip={() => handleSkip(props.navigation)}
                 onSignedIn={handleSignedIn}
               />
             )}
@@ -251,7 +257,7 @@ export default function AppNavigator() {
             {(props) => (
               <WelcomeScreen
                 {...props}
-                onSkip={handleSkip}
+                onSkip={() => handleSkip(props.navigation)}
                 onSignedIn={handleSignedIn}
               />
             )}
