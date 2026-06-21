@@ -6,7 +6,6 @@ import {
   SafeAreaView, 
   StyleSheet, 
   ActivityIndicator, 
-  Alert, 
   Image, 
   Dimensions, 
   ToastAndroid, 
@@ -35,12 +34,11 @@ import Animated, {
   withSequence, 
   withTiming, 
   withSpring,
-  Easing,
-  interpolate
+  Easing
 } from 'react-native-reanimated';
 import { useTheme } from '../utils/theme';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = (size: number) => (SCREEN_WIDTH / 375) * size;
 
 interface WelcomeScreenProps {
@@ -52,7 +50,7 @@ interface WelcomeScreenProps {
 export default function WelcomeScreen({ onSkip, onSignedIn, navigation }: WelcomeScreenProps) {
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const { colors, isAmoled } = useTheme();
+  const { colors } = useTheme();
 
   // Tab State
   const [isSignUp, setIsSignUp] = useState(false);
@@ -238,7 +236,7 @@ export default function WelcomeScreen({ onSkip, onSignedIn, navigation }: Welcom
         </View>
 
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboardView}
         >
           <ScrollView 
@@ -362,12 +360,12 @@ export default function WelcomeScreen({ onSkip, onSignedIn, navigation }: Welcom
                         </View>
                       )}
 
-                      {/* Main Email CTA Button */}
+                      {/* Main Email CTA Button (wrapped in scale animated press feedback) */}
                       <Pressable
                         onPress={handleEmailAuth}
                         disabled={isAuthLoading || isGoogleSigningIn}
                         style={({ pressed }) => [
-                          styles.submitBtn,
+                          { width: '100%' },
                           pressed && styles.btnPressed
                         ]}
                       >
@@ -375,7 +373,7 @@ export default function WelcomeScreen({ onSkip, onSignedIn, navigation }: Welcom
                           colors={['#6366F1', '#4F46E5']}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 0 }}
-                          style={styles.submitGradient}
+                          style={[styles.submitBtn, styles.submitGradient]}
                         >
                           {isAuthLoading ? (
                             <ActivityIndicator color="#FFF" />
@@ -400,11 +398,11 @@ export default function WelcomeScreen({ onSkip, onSignedIn, navigation }: Welcom
                       onPress={handleGoogleSignIn}
                       disabled={isGoogleSigningIn || isAuthLoading}
                       style={({ pressed }) => [
-                        styles.googleBtn,
+                        { width: '100%' },
                         pressed && styles.btnPressed
                       ]}
                     >
-                      <View style={styles.googleContent}>
+                      <View style={[styles.googleBtn, styles.googleContent]}>
                         {isGoogleSigningIn ? (
                           <ActivityIndicator color="#FFF" />
                         ) : (
@@ -463,7 +461,7 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1 },
   innerContainer: { flex: 1, paddingHorizontal: scale(24), justifyContent: 'space-between', paddingBottom: scale(20) },
 
-  headerSection: { marginTop: scale(65), marginBottom: scale(15) },
+  headerSection: { marginTop: scale(50), marginBottom: scale(10) },
   botRow: { flexDirection: 'row', alignItems: 'center', gap: scale(16) },
   botIcon: { width: scale(60), height: scale(60) },
   brandContainer: { flex: 1 },
@@ -472,7 +470,7 @@ const styles = StyleSheet.create({
   brandName: { color: '#F8FAFC', fontSize: scale(26), fontWeight: '900', letterSpacing: -0.5 },
   tagline: { color: '#94A3B8', fontSize: scale(14), marginTop: scale(4), fontWeight: '600' },
 
-  cardContainer: { flex: 1, justifyContent: 'center' },
+  cardContainer: { width: '100%', marginVertical: scale(10) },
   glassCard: {
     width: '100%',
     borderRadius: scale(28),
@@ -532,7 +530,7 @@ const styles = StyleSheet.create({
   errorContainer: { flexDirection: 'row', alignItems: 'center', gap: scale(6), marginBottom: scale(14), backgroundColor: 'rgba(239, 68, 68, 0.08)', padding: scale(8), borderRadius: scale(8), borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.15)' },
   errorText: { color: '#F87171', fontSize: scale(13), fontWeight: '600', flex: 1 },
 
-  submitBtn: { width: '100%', height: scale(50), borderRadius: scale(25), overflow: 'hidden', marginTop: scale(8), shadowColor: '#6366F1', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6 },
+  submitBtn: { width: '100%', height: scale(50), borderRadius: scale(25), overflow: 'hidden', shadowColor: '#6366F1', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6 },
   submitGradient: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' },
   submitBtnText: { color: '#FFFFFF', fontSize: scale(16), fontWeight: '800', letterSpacing: 0.5 },
 
@@ -540,8 +538,8 @@ const styles = StyleSheet.create({
   dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
   dividerText: { color: '#475569', fontSize: scale(12), fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  googleBtn: { width: '100%', height: scale(48), backgroundColor: '#0F172A', borderRadius: scale(24), borderWidth: 1.5, borderColor: '#1E293B', justifyContent: 'center', alignItems: 'center' },
-  googleContent: { flexDirection: 'row', alignItems: 'center', gap: scale(10) },
+  googleBtn: { width: '100%', height: scale(48), backgroundColor: '#0F172A', borderRadius: scale(24), borderWidth: 1.5, borderColor: '#1E293B' },
+  googleContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', gap: scale(10) },
   googleIcon: { width: scale(20), height: scale(20) },
   googleBtnText: { color: '#FFFFFF', fontSize: scale(15), fontWeight: '700' },
 
